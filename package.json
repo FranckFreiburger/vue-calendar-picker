@@ -1,0 +1,21 @@
+{
+  "name": "@franck.freiburger/vue-calendar",
+  "version": "1.0.0",
+  "description": "calendar component",
+  "main": "src/calendar.vue",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FranckFreiburger/vue-calendar.git"
+  },
+  "keywords": [
+    "vue2",
+    "calendar"
+  ],
+  "author": "Franck FREIBURGER",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/FranckFreiburger/vue-calendar/issues"
+  },
+  "homepage": "https://github.com/FranckFreiburger/vue-calendar#readme"
+}
