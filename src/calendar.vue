@@ -8,36 +8,55 @@
 			<span class="next" @click="move(1)"></span>
 		</div>
 		<transition-group :name="animation" @after-enter="animation = ''" class="animation">
-			<div v-if="view === 4" class="monthView" :key="df.getMonth(current)">
+			<div v-if="view === 3" class="dayView" :key="upos">
+				<div v-for="y in 12" class="hourRow">
+					<div v-for="x in 2" class="hourCell">
+						<template v-for="arg in [df.setHours(current, (y-1) + (x-1)*12 )]">
+							<div class="hourHead" v-text="df.format(arg, 'HH:mm')"></div>
+							<div class="events">
+								<div v-for="event in ranges" v-if="!df.isEqual(event.start, event.end) && df.isWithinRange(arg, event.start, df.subMilliseconds(event.end, 1))" class="eventRange" :style="{ backgroundColor: event.color }"></div>
+								<div v-for="event in ranges" v-if="df.isEqual(event.start, event.end) && df.isSameHour(arg, event.start)" class="eventAt" :style="{ backgroundColor: event.color }"></div>
+							</div>							
+						</template>
+					</div>
+				</div>
+			</div>
+			<div v-if="view === 4" class="monthView" :key="upos">
 				<div class="dayNameRow">
 					<div v-if="!compact" class="dayNameCell"></div>
 					<div v-for="n in 7" class="dayNameCell" v-text="dowShortNames[(n-1 +firstDayOfTheWeek)%7]"></div>
 				</div>
 				<div v-for="w in compact ? visibleWeeks : 6" class="week">
 					<div v-if="!compact" class="weekHead" v-text="df.getISOWeek(date(w-1, 0))"></div>
-					<day-cell inline-template v-for="d in 7" :arg="date(w-1, d-1)">
-						<div class="dayCell" :class="{ this: m.df.isSameDay(m.today, arg), thisMonth: m.df.isSameMonth(m.current, arg), selection: m.dateInSelectionRange(arg) }" @click="m.$emit('click', arg)" @mouseenter="m.$emit('mover', arg, $event.buttons !== 0)" @mousedown="m.$emit('mousedown', arg)" @mouseup="m.$emit('mouseup', arg)">
-							<div class="dayNumber" v-text="m.df.getDate(arg)"></div>
+					<template v-for="d in 7">
+					<template v-for="arg in [date(w-1, d-1)]">
+						<div class="dayCell" :class="{ this: df.isSameDay(today, arg), thisMonth: df.isSameMonth(current, arg), selection: dateInSelectionRange(arg) }" @click="$emit('click', arg)" @dblclick="dblclick(arg)" @mouseenter="$emit('over', arg, $event.buttons !== 0)" @mousedown="$emit('mousedown', arg)" @mouseup="$emit('mouseup', arg)">
+							<div class="dayNumber" v-text="df.getDate(arg)"></div>
 							<div class="events">
-								<div v-for="event in m.ranges" v-if="!m.df.isEqual(event.start, event.end) && m.df.isWithinRange(arg, event.start, event.end)" class="eventRange" :style="{ backgroundColor: event.color }"></div>
-								<div v-for="event in m.ranges" v-if="m.df.isEqual(event.start, event.end) && m.df.isSameDay(arg, event.start)" class="eventAt" :style="{ backgroundColor: event.color }"></div>
+								<div v-for="event in ranges" v-if="!df.isEqual(event.start, event.end) && df.isWithinRange(arg, event.start, df.subMilliseconds(event.end, 1))" class="eventRange" :style="{ backgroundColor: event.color }"></div>
+								<div v-for="event in ranges" v-if="df.isEqual(event.start, event.end) && df.isSameDay(arg, event.start)" class="eventAt" :style="{ backgroundColor: event.color }"></div>
 							</div>
 						</div>
-					</day-cell>
+					</template>
+					</template>
 				</div>
 			</div>
-			<div v-if="view === 5" class="yearView" :key="df.getYear(current)">
+			<div v-if="view === 5" class="yearView" :key="upos">
 				<div v-for="y in 3" class="monthRow">
-					<month-cell inline-template v-for="x in 4" :arg="df.setMonth(current, (y-1)*4 + (x-1))">
-						<div class="monthCell" :class="{ this:m.df.isSameMonth(m.today, arg) }" @click="m.current = arg; m.view = 4" v-text="m.monthShortNames[m.df.getMonth(arg)]"></div>
-					</month-cell>
+					<template v-for="x in 4">
+					<template v-for="arg in [df.setMonth(current, (y-1)*4 + (x-1))]">
+						<div class="monthCell" :class="{ this: df.isSameMonth(today, arg) }" @click="current = arg; view = 4" v-text="monthShortNames[df.getMonth(arg)]"></div>
+					</template>
+					</template>
 				</div>
 			</div>
-			<div v-if="view === 6" class="centuryView" :key="Math.floor(df.getYear(current)/12)">
+			<div v-if="view === 6" class="centuryView" :key="upos">
 				<div v-for="y in 4" class="yearRow">
-					<year-cell inline-template v-for="x in 4" :arg="df.addYears(current, (y-1)*4 + (x-1) - 9)">
-						<div class="yearCell" :class="{ this:m.df.isSameYear(m.today, arg) }" @click="m.current = arg; m.view = 5" v-text="m.df.getYear(arg)"></div>
-					</year-cell>
+					<template v-for="x in 4">
+					<template v-for="arg in [df.addYears(current, (y-1)*4 + (x-1) - 9)]">
+							<div class="yearCell" :class="{ this: df.isSameYear(today, arg) }" @click="current = arg; view = 5" v-text="df.getYear(arg)"></div>
+					</template>
+					</template>
 				</div>
 			</div>
 		</transition-group>
@@ -221,10 +240,51 @@
 	text-align: right;
 }
 	
+/* day */
+
+.dayView {
+	display: table;
+	width: 100%;
+	height: 100%;
+}
+
+.hourRow {
+	display: table-row;
+}
+
+.hourCell {
+	display: table-cell;
+	width: 50%;
+}
+
+.hourHead {
+	display: inline-block;
+	margin-right: 0.5em;
+}
 
 
+.dayView .events {
+	display: inline-block;
+	height: 100%;
+}
+
+.dayView .eventRange {
+	display: inline-block;
+	margin: 0 2px;
+	width: 4px;
+	height: 100%;
+}
+
+.dayView .eventAt {
+	display: inline-block;
+	vertical-align: middle;
+	margin: 1px;
+	width: 4px;
+	height: 4px;
+}
 
 
+/* month */
 .monthView {
 	display: table;
 	width: 100%;
@@ -281,17 +341,17 @@
 }
 
 
-.events {
+.monthView .events {
 	text-align: center;
 	line-height: 0;
 }
 
-.eventRange {
+.monthView .eventRange {
 	margin: 2px 0;
 	height: 2px;
 }
 
-.eventAt {
+.monthView .eventAt {
 	display: inline-block;
 	margin: 1px;
 	width: 4px;
@@ -344,18 +404,7 @@ var locales = {
 }
 
 module.exports = {
-	provide: function() {
-		return {
-			m: this
-		}
-	},
-	
-	components: {
-		'day-cell': { inject: [ 'm' ], props: [ 'arg' ] },
-		'month-cell': { inject: [ 'm' ], props: [ 'arg' ] },
-		'year-cell': { inject: [ 'm' ], props: [ 'arg' ] },
-	},
-	
+
 	props: {
 		compact: {
 			type: Boolean,
@@ -377,7 +426,7 @@ module.exports = {
 		return {
 			animation: '',
 			locale: 'FR',
-			view: 4,
+			view: 3,
 			current: df.startOfDay(Date.now()),
 			today: df.startOfDay(Date.now()),
 		}
@@ -397,6 +446,11 @@ module.exports = {
 	},
 
 	computed: {
+		
+		upos: function() {
+			
+			return String(this.view) + String(df.getTime(this.current));
+		},
 		
 		firstDayOfTheWeek: function() {
 			
@@ -438,6 +492,12 @@ module.exports = {
 			var start = this.selection.start;
 			var end = this.selection.end;
 			return df.isWithinRange(date, df.min(start, end), df.max(start, end));
+		},
+		
+		dblclick: function(arg) {
+		
+			this.current = arg;
+			this.view = 3
 		},
 
 		move: function(dir) {
