@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/FranckFreiburger/vue-calendar/issues"
   },
-  "homepage": "https://github.com/FranckFreiburger/vue-calendar#readme"
+  "homepage": "https://github.com/FranckFreiburger/vue-calendar#readme",
+  "dependencies": {
+    "date-fns": "^1.28.4"
+  }
 }
