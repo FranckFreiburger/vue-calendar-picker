@@ -11,7 +11,7 @@
 			<div v-if="view === VIEW.DAY" class="dayView" :key="posId" @click="mouse" @dblclick="mouse" @mousedown="mouse" @mouseup="mouse" @mouseover="mouse">
 				<div v-for="y in 12" class="hourRow">
 					<template v-for="x in 2">
-						<div v-for="arg in [df.setHours(current, (y-1) + (x-1)*12 )]" :data-arg="+arg" class="hourCell" :class="[ 'selection'+selectionWhole(arg) ]">
+						<div v-for="arg in [df.setHours(current, (y-1) + (x-1)*12 )]" :data-start="+arg" class="hourCell" :class="[ 'selection'+selectionWhole(arg) ]">
 							<div class="hourHead" v-text="df.format(arg, 'HH:mm')"></div>
 							<div class="events">
 								<div v-for="event in ranges" v-if="!df.isEqual(event.start, event.end) && isWithinRangeExcludeEnd(arg, event.start, event.end)" class="eventRange" :style="{ backgroundColor: event.color }"></div>
@@ -30,7 +30,7 @@
 					<div v-if="!compact" class="dayRowHead" v-text="df.getISOWeek(df.addDays(firstDayOfMonthView, (y-1) * 7))"></div>
 					<template v-for="x in 7">
 					<template v-for="arg in [df.addDays(firstDayOfMonthView, (y-1) * 7 + (x-1))]">
-						<div :data-arg="+arg" class="dayCell" :class="[ { this: df.isSameDay(today, arg), thisMonth: df.isSameMonth(current, arg) }, 'selection'+selectionWhole(arg) ]">
+						<div :data-start="+arg" class="dayCell" :class="[ { this: df.isSameDay(today, arg), thisMonth: df.isSameMonth(current, arg) }, 'selection'+selectionWhole(arg) ]">
 							<div class="dayNumber" v-text="df.getDate(arg)"></div>
 							<div class="events">
 								<div v-for="event in ranges" v-if="!df.isEqual(event.start, event.end) && isWithinRangeExcludeEnd(arg, event.start, event.end)" class="eventRange" :style="{ backgroundColor: event.color }"></div>
@@ -395,6 +395,7 @@
 "use strict";
 
 
+
 var df = require('date-fns'); // https://date-fns.org
 
 function firstDayOfTheWeek(locale) {
@@ -514,74 +515,54 @@ module.exports = {
 	
 	methods: {
 		
+		viewItemRange: function(date) {
+
+			switch ( this.view ) {
+				case VIEW.DAY:
+					return { start: df.startOfHour(date), end: df.startOfHour(df.addHours(date, 1)) };
+				case VIEW.MONTH:
+					return { start: df.startOfDay(date), end: df.startOfDay(df.addDays(date, 1)) };
+				case VIEW.YEAR:
+					return { start: df.startOfMonth(date), end: df.startOfMonth(df.addMonths(date, 1)) };
+				case VIEW.DECADE:
+					return { start: df.startOfYear(date), end: df.startOfYear(df.addYears(date, 1)) };
+			}
+			throw 'Not implemented';
+		},
+		
 		selectionWhole: function(date) {
 		
 			var start = this.selection.start;
 			var end = this.selection.end;
 			var min = df.min(start, end);
-			var max = df.subMilliseconds(df.max(start, end), 1);
+			var max = df.max(start, end);
 			
-			
-			date is a point ?
-			
-			if ( df.isWithinRange(date, min, max) )
-				return 2;
+			var dateRange = this.viewItemRange(date);
 
-			if (
-				 this.view === VIEW.HOUR && (df.isSameMinute(date, min) || df.isSameMinute(date, max)) ||
-				 this.view === VIEW.DAY && (df.isSameHour(date, min) || df.isSameHour(date, max)) ||
-				 this.view === VIEW.MONTH && (df.isSameDay(date, min) || df.isSameDay(date, max)) ||
-				 /* week ?? */
-				 this.view === VIEW.YEAR && (df.isSameMonth(date, min) || df.isSameMonth(date, max)) ||
-				 this.view === VIEW.DECADE && (df.isSameYear(date, min) || df.isSameYear(date, max)) )
+			if ( +min <= +dateRange.start && +max >= +dateRange.end )
+				return 2;
+			if ( min > dateRange.start && min < dateRange.end || max > dateRange.start && max < dateRange.end )
 				return 1;
 			return 0;
 		},
 
 		mouse: function(ev) {
 			
-			var value = findDataAttr(ev.target, 'arg');
+			var value = findDataAttr(ev.target, 'start');
 			if ( value === undefined )
 				return;
 			
-			var date = df.parse(value);
+			var range = this.viewItemRange(value);
+			
+			console.log(range.end)
 			
 			if ( this.view === VIEW.MONTH && ev.type === 'dblclick' ) {
 				
-				this.current = date;
+				this.current = range.start;
 				this.view = VIEW.DAY;
 				return;
 			}
 			
-			var range = {
-				start: date
-			}
-			
-			if ( this.view === VIEW.HOUR )
-				range.end = df.addMinutes(date, 1);
-			else
-			if ( this.view === VIEW.DAY )
-				range.end = df.addHours(date, 1);
-			else
-			if ( this.view === VIEW.MONTH )
-				range.end = df.addDays(date, 1);
-			else
-			if ( this.view === VIEW.YEAR )
-				range.end = df.addMonths(date, 1);
-/*
-			if ( this.view === VIEW.HOUR )
-				range.end = df.endOfMinute(date);
-			else
-			if ( this.view === VIEW.DAY )
-				range.end = df.endOfHour(date);
-			else
-			if ( this.view === VIEW.MONTH )
-				range.end = df.endOfDay(date);
-			else
-			if ( this.view === VIEW.YEAR )
-				range.end = df.endOfMonth(date);
-
-*/
 			this.$emit(ev.type, range, this.view, ev.buttons !== 0);
 		},
 
@@ -613,6 +594,17 @@ module.exports = {
 			if (startTime > endTime)
 				throw new Error('The start of the range cannot be after the end of the range');
 			return time >= startTime && time < endTime;
+		}
+		
+		this.json = function(val) {
+			
+			return JSON.stringify(val, function(key, value) {
+				
+				console.log(value)
+				if ( value instanceof Date )
+					return +value;
+				return value;
+			});
 		}
 		
 		this.df = df;
