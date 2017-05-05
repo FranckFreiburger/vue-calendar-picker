@@ -485,11 +485,6 @@ module.exports = {
 			return firstDayOfTheWeek(this.locale);
 		},
 
-		visibleWeeks: function() {
-
-			return Math.ceil((df.getDaysInMonth(this.current) + df.getDay(df.startOfMonth(this.current)) ) / 7);
-		},
-
 		dowShortNames: function() {
 		
 			var d = df.startOfWeek(new Date());
@@ -507,6 +502,11 @@ module.exports = {
 			return names;
 		},
 		
+		visibleWeeks: function() {
+
+			return Math.ceil((df.getDaysInMonth(this.current) + df.getDay(df.startOfMonth(this.current)) ) / 7);
+		},
+
 		firstDayOfMonthView: function() {
 			
 			return df.setDay(df.startOfMonth(this.current), this.firstDayOfTheWeek);
@@ -514,8 +514,8 @@ module.exports = {
 	},
 	
 	methods: {
-		
-		viewItemRange: function(date) {
+
+		viewRangeItem: function(date) {
 
 			switch ( this.view ) {
 				case VIEW.DAY:
@@ -537,11 +537,11 @@ module.exports = {
 			var min = df.min(start, end);
 			var max = df.max(start, end);
 			
-			var dateRange = this.viewItemRange(date);
+			var dateRange = this.viewRangeItem(date);
 
-			if ( +min <= +dateRange.start && +max >= +dateRange.end )
+			if ( !(df.isAfter(min, dateRange.start) || df.isBefore(max, dateRange.end)) )
 				return 2;
-			if ( min > dateRange.start && min < dateRange.end || max > dateRange.start && max < dateRange.end )
+			if ( df.areRangesOverlapping(min, max, dateRange.start, dateRange.end) )
 				return 1;
 			return 0;
 		},
@@ -552,9 +552,7 @@ module.exports = {
 			if ( value === undefined )
 				return;
 			
-			var range = this.viewItemRange(value);
-			
-			console.log(range.end)
+			var range = this.viewRangeItem(value);
 			
 			if ( this.view === VIEW.MONTH && ev.type === 'dblclick' ) {
 				
@@ -588,23 +586,7 @@ module.exports = {
 		
 		this.isWithinRangeExcludeEnd = function(dirtyDate, dirtyStartDate, dirtyEndDate) {
 			
-			var time = df.parse(dirtyDate).getTime();
-			var startTime = df.parse(dirtyStartDate).getTime();
-			var endTime = df.parse(dirtyEndDate).getTime();
-			if (startTime > endTime)
-				throw new Error('The start of the range cannot be after the end of the range');
-			return time >= startTime && time < endTime;
-		}
-		
-		this.json = function(val) {
-			
-			return JSON.stringify(val, function(key, value) {
-				
-				console.log(value)
-				if ( value instanceof Date )
-					return +value;
-				return value;
-			});
+			return df.isWithinRange(dirtyDate, dirtyStartDate, dirtyEndDate) && !df.isEqual(dirtyDate, dirtyEndDate);
 		}
 		
 		this.df = df;
