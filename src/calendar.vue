@@ -3,6 +3,7 @@
 		<div class="nav">
 			<span class="prev" @click="move(-1)"></span>
 			<span v-if="view <= VIEW.DAY" @click="view = VIEW.MONTH" v-text="df.getDate(current)"></span>
+			<span v-if="view === VIEW.WEEK" @click="view = VIEW.MONTH" v-text="'['+df.getISOWeek(current)+']'"></span>
 			<span v-if="view <= VIEW.MONTH" @click="view = VIEW.YEAR" v-text="monthShortNames[df.getMonth(current)]"></span>
 			<span v-if="view <= VIEW.YEAR" @click="view = VIEW.DECADE" v-text="df.getYear(current)"></span>
 			<span class="next" @click="move(1)"></span>
@@ -11,26 +12,59 @@
 			<div v-if="view === VIEW.DAY" class="dayView" :key="posId" @click="mouse" @dblclick="mouse" @mousedown="mouse" @mouseup="mouse" @mouseover="mouse">
 				<div v-for="y in 12" class="hourRow">
 					<template v-for="x in 2">
-						<div v-for="arg in [df.setHours(current, (y-1) + (x-1)*12 )]" :data-start="+arg" class="hourCell" :class="[ 'selection'+selectionWhole(arg) ]">
+						<div v-for="arg in [df.setHours(current, (y-1) + (x-1)*12 )]" v-data:item.json="[+arg, 'hour']" class="hourCell" :class="[ 'selection'+selectionWhole(arg, 'hour') ]">
 							<div class="hourHead" v-text="df.format(arg, 'HH:mm')"></div>
 							<div class="events">
 								<div v-for="event in ranges" v-if="!df.isEqual(event.start, event.end) && isWithinRangeExcludeEnd(arg, event.start, event.end)" class="eventRange" :style="{ backgroundColor: event.color }"></div>
 								<div v-for="event in ranges" v-if="df.isEqual(event.start, event.end) && df.isSameHour(arg, event.start)" class="eventAt" :style="{ backgroundColor: event.color }"></div>
-							</div>							
+							</div>
 						</div>
 					</template>
 				</div>
 			</div>
+
+			<div v-if="view === VIEW.WEEK" class="weekView" :key="posId" @click="mouse" @dblclick="mouse" @mousedown="mouse" @mouseup="mouse" @mouseover="mouse">
+				<div>
+					<span></span>
+					<template v-for="x in 7">
+						<span
+							v-for="arg in [df.addDays(df.startOfWeek(current, { weekStartsOn: firstDayOfTheWeek }), x-1)]"
+							v-data:item.json="[+arg, 'day']"
+							:class="[ { this: df.isSameDay(today, arg) } ]"
+							v-text="format(arg, 'ddD')"
+						></span>
+					</template>
+				</div>
+				<div v-for="y in 24">
+					<span v-text="y-1"></span>
+					<template v-for="x in 7">
+						<span
+							v-for="arg in [df.addHours(df.addDays(df.startOfWeek(current, { weekStartsOn: firstDayOfTheWeek }), x-1), y-1)]"
+							v-data:item.json="[+arg, 'hour']"
+							:class="[ { thisMonth: df.isSameMonth(current, arg) }, 'selection'+selectionWhole(arg, 'hour') ]"
+						>
+							<div class="events">
+								<div v-for="event in ranges" v-if="!df.isEqual(event.start, event.end) && isWithinRangeExcludeEnd(arg, event.start, event.end)" class="eventRange" :style="{ backgroundColor: event.color }"></div>
+								<div v-for="event in ranges" v-if="df.isEqual(event.start, event.end) && df.isSameHour(arg, event.start)" class="eventAt" :style="{ backgroundColor: event.color }"></div>
+							</div>
+						</span>
+					</template>
+				</div>
+			</div>
+
+			
 			<div v-if="view === VIEW.MONTH" class="monthView" :key="posId" @click="mouse" @dblclick="mouse" @mousedown="mouse" @mouseup="mouse" @mouseover="mouse">
 				<div class="dayNameRow">
 					<div v-if="!compact" class="dayNameCell"></div>
 					<div v-for="n in 7" class="dayNameCell" v-text="dowShortNames[(n-1 +firstDayOfTheWeek)%7]"></div>
 				</div>
 				<div v-for="y in compact ? visibleWeeks : 6" class="dayRow">
-					<div v-if="!compact" class="dayRowHead" v-text="df.getISOWeek(df.addDays(firstDayOfMonthView, (y-1) * 7))"></div>
+					<template v-for="week in [df.addDays(firstDayOfMonthView, (y-1) * 7)]">
+						<div v-if="!compact" v-data:item.json="[week, 'week']" class="dayRowHead" v-text="df.getISOWeek(week)"></div>
+					</template>
 					<template v-for="x in 7">
 					<template v-for="arg in [df.addDays(firstDayOfMonthView, (y-1) * 7 + (x-1))]">
-						<div :data-start="+arg" class="dayCell" :class="[ { this: df.isSameDay(today, arg), thisMonth: df.isSameMonth(current, arg) }, 'selection'+selectionWhole(arg) ]">
+						<div v-data:item.json="[+arg, 'day']" class="dayCell" :class="[ { this: df.isSameDay(today, arg), thisMonth: df.isSameMonth(current, arg) }, 'selection'+selectionWhole(arg, 'day') ]">
 							<div class="dayNumber" v-text="df.getDate(arg)"></div>
 							<div class="events">
 								<div v-for="event in ranges" v-if="!df.isEqual(event.start, event.end) && isWithinRangeExcludeEnd(arg, event.start, event.end)" class="eventRange" :style="{ backgroundColor: event.color }"></div>
@@ -41,6 +75,8 @@
 					</template>
 				</div>
 			</div>
+			
+			
 			<div v-if="view === VIEW.YEAR" class="yearView" :key="posId">
 				<div v-for="y in 3" class="monthRow">
 					<template v-for="x in 4">
@@ -50,7 +86,7 @@
 					</template>
 				</div>
 			</div>
-			<div v-if="view === VIEW.DECADE" class="centuryView" :key="posId">
+			<div v-if="view === VIEW.DECADE" class="decadeView" :key="posId">
 				<div v-for="y in 4" class="yearRow">
 					<template v-for="x in 4">
 					<template v-for="arg in [df.addYears(current, (y-1)*4 + (x-1) - 9)]">
@@ -182,6 +218,14 @@
 	padding-top: 1em;
 }
 
+.row {
+	display: table-row;
+}
+
+.cell {
+	display: table-cell;
+}
+
 
 /* nav */
 .nav {
@@ -242,6 +286,28 @@
 	text-align: right;
 }
 
+/* */
+
+.hourCell:hover,
+.dayCell:hover,
+.monthCell:hover,
+.yearCell:hover {
+	background-color: #eee;
+}
+
+.this {
+	outline: 2px dotted #faa;
+}
+
+.selection2 {
+	background-color: #cde;
+}
+
+.selection1 {
+	background-color: #def;
+}
+
+
 
 /* day */
 
@@ -251,20 +317,22 @@
 	height: 100%;
 }
 
-.hourRow {
+.dayView .hourRow {
 	display: table-row;
 }
 
-.hourCell {
+.dayView .hourCell {
 	display: table-cell;
 	width: 50%;
 }
 
-.hourHead {
+.dayView .hourHead {
 	display: inline-block;
 	margin-right: 0.5em;
 }
 
+
+/* events */
 
 .dayView .events {
 	display: inline-block;
@@ -287,6 +355,57 @@
 }
 
 
+/* week */
+
+.weekView {
+	display: table;
+	width: 100%;
+	height: 100%;
+}
+
+.weekView > div {
+	display: table-row;
+}
+
+.weekView > div > span {
+	display: table-cell;
+	line-height: 0;
+}
+
+.weekView > div:first-child > span {
+	line-height: normal;
+}
+
+.weekView > div:nth-child(odd) > span:first-child {
+	font-size: 0;
+}
+
+
+.weekView .events {
+	display: inline-block;
+	height: 100%;
+}
+
+.weekView .eventRange {
+	display: inline-block;
+	margin: 0 2px;
+	width: 4px;
+	height: 100%;
+}
+
+.weekView .eventAt {
+	display: inline-block;
+	vertical-align: middle;
+	margin: 1px;
+	width: 4px;
+	height: 4px;
+}
+
+
+
+
+
+
 /* month */
 
 .monthView {
@@ -295,61 +414,43 @@
 	height: 100%;
 }
 
-.dayNameRow {
+.monthView .dayNameRow {
 	display: table-row;
 }
 
-.dayNameCell {
+.monthView .dayNameCell {
 	display: table-cell;
 	text-align: center;
+	white-space: nowrap;
 }
 
-.dayRow {
+.monthView .dayRow {
 	display: table-row;
 	height: 15%;
 }
 
-.dayRowHead {
+.monthView .dayRowHead {
 	display: table-cell;
 	width: 1.5em;
 	text-align: center;
 	font-weight: bold;
 }
 
-.dayCell {
+.monthView .dayCell {
 	display: table-cell;
 	width: 13%;
 }
 
-.hourCell:hover,
-.dayCell:hover,
-.monthCell:hover,
-.yearCell:hover {
-	background-color: #eee;
-}
-
-.dayNumber {
+.monthView .dayNumber {
 	text-align: center;
 }
 
-
-.this {
-	outline: 2px dotted #faa;
-}
-
-.dayCell:not(.thisMonth) .dayNumber {
+.monthView .dayCell:not(.thisMonth) .dayNumber {
 	color: silver;
 }
 
-.selection2 {
-	background-color: #cde;
-}
 
-.selection1 {
-	background-color: #def;
-}
-
-
+/* month */
 
 .monthView .events {
 	text-align: center;
@@ -368,22 +469,22 @@
 	height: 4px;
 }
 
-/* yearView / centuryView */
+/* yearView / decadeView */
 
 .yearView,
-.centuryView {
+.decadeView {
 	display: table;
 	width: 100%;
 	height: 100%;
 }
 
 .yearView .monthRow,
-.centuryView .yearRow {
+.decadeView .yearRow {
 	display: table-row;
 }
 
 .yearView .monthCell,
-.centuryView .yearCell {
+.decadeView .yearCell {
 	display: table-cell;
 	text-align: center;
 	vertical-align: middle;
@@ -393,7 +494,6 @@
 </style>
 <script>
 "use strict";
-
 
 
 var df = require('date-fns'); // https://date-fns.org
@@ -425,13 +525,22 @@ function findDataAttr(elt, dataAttrName) {
 var VIEW = {
 	HOUR: 3,
 	DAY: 4,
-	//WEEK: 5,
+	WEEK: 5,
 	MONTH: 6,
 	YEAR: 7,
 	DECADE: 8,
 }
 
 module.exports = {
+	
+	directives: {
+		data: function(el, binding) {
+
+			if ( binding.value === binding.oldValue )
+				return;
+			el.dataset[binding.arg] = binding.modifiers.json === true ? JSON.stringify(binding.value) : binding.value;
+		}
+	},
 
 	props: {
 		compact: {
@@ -514,30 +623,36 @@ module.exports = {
 	},
 	
 	methods: {
-
-		viewRangeItem: function(date) {
-
-			switch ( this.view ) {
-				case VIEW.DAY:
-					return { start: df.startOfHour(date), end: df.startOfHour(df.addHours(date, 1)) };
-				case VIEW.MONTH:
-					return { start: df.startOfDay(date), end: df.startOfDay(df.addDays(date, 1)) };
-				case VIEW.YEAR:
-					return { start: df.startOfMonth(date), end: df.startOfMonth(df.addMonths(date, 1)) };
-				case VIEW.DECADE:
-					return { start: df.startOfYear(date), end: df.startOfYear(df.addYears(date, 1)) };
-			}
-			throw 'Not implemented';
+		format: function(date, format) {
+			
+			return df.format(date, format, { locale: locales[this.locale] })
 		},
 		
-		selectionWhole: function(date) {
+		getItemRange: function(date, type) {
+			
+			switch ( type ) {
+				case 'hour':
+					return { start: df.startOfHour(date), end: df.startOfHour(df.addHours(date, 1)) };
+				case 'day':
+					return { start: df.startOfDay(date), end: df.startOfDay(df.addDays(date, 1)) };
+				case 'week':
+					var options = { weekStartsOn: this.firstDayOfTheWeek };
+					return { start: df.startOfWeek(date, options), end: df.startOfWeek(df.addWeeks(date, 1), options) };
+				case 'month':
+					return { start: df.startOfMonth(date), end: df.startOfMonth(df.addMonths(date, 1)) };
+				case 'year':
+					return { start: df.startOfYear(date), end: df.startOfYear(df.addYears(date, 1)) };
+			}
+		},
+
+		selectionWhole: function(date, type) {
 		
 			var start = this.selection.start;
 			var end = this.selection.end;
 			var min = df.min(start, end);
 			var max = df.max(start, end);
-			
-			var dateRange = this.viewRangeItem(date);
+
+			var dateRange = this.getItemRange(date, type)
 
 			if ( !(df.isAfter(min, dateRange.start) || df.isBefore(max, dateRange.end)) )
 				return 2;
@@ -548,19 +663,32 @@ module.exports = {
 
 		mouse: function(ev) {
 			
-			var value = findDataAttr(ev.target, 'start');
+			var value = findDataAttr(ev.target, 'item');
 			if ( value === undefined )
 				return;
 			
-			var range = this.viewRangeItem(value);
+			var date = df.parse(value[0]);
+			var type = value[1];
 			
-			if ( this.view === VIEW.MONTH && ev.type === 'dblclick' ) {
+			
+			if ( ev.type === 'dblclick' ) {
 				
-				this.current = range.start;
-				this.view = VIEW.DAY;
+				switch ( type ) {
+					case 'week':
+						this.view = VIEW.WEEK;
+						this.current = date;
+						break;
+					case 'day':
+						this.view = VIEW.DAY;
+						this.current = date;
+						break;
+				}
 				return;
 			}
 			
+			var range = this.getItemRange(date, type);
+			
+			console.log(date, type,  range )
 			this.$emit(ev.type, range, this.view, ev.buttons !== 0);
 		},
 
@@ -569,6 +697,9 @@ module.exports = {
 			switch ( this.view ) {
 				case VIEW.DAY:
 					this.current = df.addDays(this.current, dir);
+					break;
+				case VIEW.WEEK:
+					this.current = df.addWeeks(this.current, dir);
 					break;
 				case VIEW.MONTH:
 					this.current = df.addMonths(this.current, dir);
@@ -588,7 +719,7 @@ module.exports = {
 			
 			return df.isWithinRange(dirtyDate, dirtyStartDate, dirtyEndDate) && !df.isEqual(dirtyDate, dirtyEndDate);
 		}
-		
+				
 		this.df = df;
 		this.VIEW = VIEW;
 	}
