@@ -2,7 +2,7 @@
   "name": "@franck.freiburger/vue-calendar",
   "version": "1.0.0",
   "description": "calendar component",
-  "main": "src/calendar.vue",
+  "main": "src/index.js",
   "scripts": {},
   "repository": {
     "type": "git",

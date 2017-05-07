@@ -3,7 +3,7 @@
 		<div class="nav">
 			<span class="prev" @click="move(-1)"></span>
 			<span v-if="view <= VIEW.DAY" @click="view = VIEW.MONTH" v-text="df.getDate(current)"></span>
-			<span v-if="view === VIEW.WEEK" @click="view = VIEW.MONTH" v-text="'['+df.getISOWeek(current)+']'"></span>
+			<span v-if="view === VIEW.WEEK" @click="view = VIEW.MONTH" v-text="'W'+df.getISOWeek(current)"></span>
 			<span v-if="view <= VIEW.MONTH" @click="view = VIEW.YEAR" v-text="format(current, 'MMM')"></span>
 			<span v-if="view <= VIEW.YEAR" @click="view = VIEW.DECADE" v-text="df.getYear(current)"></span>
 			<span class="next" @click="move(1)"></span>
@@ -14,11 +14,8 @@
 				<div v-for="y in 12">
 					<template v-for="x in 2">
 						<span v-for="arg in [df.setHours(current, (y-1) + (x-1)*12 )]" v-data:item.json="[+arg, 'hour']" :class="[ 'selection'+selectionWhole(arg, 'hour') ]">
-							<span v-text="df.format(arg, 'HH:mm')"></span>
-							<div class="events">
-								<div v-for="event in ranges" v-if="!df.isEqual(event.start, event.end) && isWithinRangeExcludeEnd(arg, event.start, event.end)" class="eventRange" :style="{ backgroundColor: event.color }"></div>
-								<div v-for="event in ranges" v-if="df.isEqual(event.start, event.end) && df.isSameHour(arg, event.start)" class="eventAt" :style="{ backgroundColor: event.color }"></div>
-							</div>
+							<span class="cellHead" v-text="df.format(arg, 'HH:mm')"></span>
+							<slot :arg="arg" type="hour"></slot>
 						</span>
 					</template>
 				</div>
@@ -44,10 +41,7 @@
 							v-data:item.json="[+arg, 'hour']"
 							:class="[ { thisMonth: df.isSameMonth(current, arg) }, 'selection'+selectionWhole(arg, 'hour') ]"
 						>
-							<div class="events">
-								<div v-for="event in ranges" v-if="!df.isEqual(event.start, event.end) && isWithinRangeExcludeEnd(arg, event.start, event.end)" class="eventRange" :style="{ backgroundColor: event.color }"></div>
-								<div v-for="event in ranges" v-if="df.isEqual(event.start, event.end) && df.isSameHour(arg, event.start)" class="eventAt" :style="{ backgroundColor: event.color }"></div>
-							</div>
+							<slot :arg="arg" type="hour"></slot>
 						</span>
 					</template>
 				</div>
@@ -68,11 +62,8 @@
 							v-data:item.json="[+arg, 'day']"
 							:class="[ { this: df.isSameDay(today, arg), notThisMonth: !df.isSameMonth(current, arg) }, 'selection'+selectionWhole(arg, 'day') ]"
 						>
-							<span class="dayNumber" v-text="df.getDate(arg)"></span>
-							<div class="events">
-								<div v-for="event in ranges" v-if="!df.isEqual(event.start, event.end) && isWithinRangeExcludeEnd(arg, event.start, event.end)" class="eventRange" :style="{ backgroundColor: event.color }"></div>
-								<div v-for="event in ranges" v-if="df.isEqual(event.start, event.end) && df.isSameDay(arg, event.start)" class="eventAt" :style="{ backgroundColor: event.color }"></div>
-							</div>
+							<span class="cellHead" v-text="df.getDate(arg)"></span>
+							<slot :arg="arg" type="day"></slot>
 						</span>
 					</template>
 				</div>
@@ -84,9 +75,11 @@
 						<span
 							v-for="arg in [df.setMonth(current, (y-1)*4 + (x-1))]"
 							v-data:item.json="[+arg, 'month']"
-							:class="{ this: df.isSameMonth(today, arg) }"
-							v-text="format(arg, compact ? 'MMM' : 'MMMM')"
-						></span>
+							:class="[ { this: df.isSameMonth(today, arg) }, 'selection'+selectionWhole(arg, 'month') ]"
+						>
+							<span class="cellHead" v-text="format(arg, compact ? 'MMM' : 'MMMM')"></span>
+							<slot :arg="arg" type="month"></slot>
+						</span>
 					</template>
 				</div>
 			</div>
@@ -97,9 +90,10 @@
 						<span
 							v-for="arg in [df.addYears(current, (y-1)*4 + (x-1) - 9)]"
 							v-data:item.json="[+arg, 'year']"
-							:class="{ this: df.isSameYear(today, arg) }"
-							v-text="df.getYear(arg)"
-						></span>
+							:class="[ { this: df.isSameMonth(today, arg) }, 'selection'+selectionWhole(arg, 'year') ]"
+						>
+							<span class="cellHead" v-text="df.getYear(arg)"></span>
+						</span>
 					</template>
 				</div>
 			</div>
@@ -107,7 +101,7 @@
 	</div>
 </template>
 
-<style>
+<style scoped>
 
 .forwardSlide-enter-active {
 	position: absolute;
@@ -206,8 +200,6 @@
 	overflow: hidden;
 }
 
-
-
 .calendar {
 	position: relative;
 
@@ -226,8 +218,12 @@
 	padding-top: 1em;
 }
 
+</style>
 
+
+<style>
 /* nav */
+
 .nav {
 	position: absolute;
 	top: 0;
@@ -286,7 +282,8 @@
 	text-align: right;
 }
 
-/* */
+
+/* selection */
 
 span[data-item]:hover {
 	background-color: #eee;
@@ -302,54 +299,6 @@ span[data-item]:hover {
 
 .selection1 {
 	background-color: #def;
-}
-
-
-
-/* events */
-
-.view .events {
-	display: inline-block;
-	line-height: 0;
-}
-
-.view .eventRange {
-	display: inline-block;
-}
-
-.view .eventAt {
-	display: inline-block;
-	margin: 1px;
-	width: 4px;
-	height: 4px;
-}
-
-.timeHorizontal .events {
-	width: 100%;
-	vertical-align: top;
-}
-
-.timeHorizontal .eventRange {
-	width: 100%;
-	margin: 2px 0;
-	height: 2px;
-}
-
-.timeHorizontal .eventAt {
-}
-
-.timeVertical .events {
-	height: 100%;
-}
-
-.timeVertical .eventRange {
-	height: 100%;
-	margin: 0 2px;
-	width: 2px;	
-}
-
-.timeVertical .eventAt {
-	vertical-align: middle;
 }
 
 
@@ -376,7 +325,7 @@ span[data-item]:hover {
 	height: 1%;
 }
 
-.dayView > div > span span:first-child {
+.dayView .cellHead {
 	margin-right: 0.5em;
 	vertical-align: top;
 }
@@ -413,12 +362,12 @@ span[data-item]:hover {
 	padding: 0 0.25em 0.25em 0.25em;
 }
 
-.monthView > div > span:first-child {
+.calendar:not(.compact) .monthView > div > span:first-child {
 	text-align: center;
 	font-weight: bold;
 }
 
-.monthView .notThisMonth .dayNumber {
+.monthView .notThisMonth .cellHead {
 	color: silver;
 }
 
@@ -429,13 +378,16 @@ span[data-item]:hover {
 .decadeView > div > span {
 	text-align: center;
 	vertical-align: middle;
+}
+
+.yearView .cellHead,
+.decadeView .cellHead {
 	padding: 0.25em;
 }
-	
+
 </style>
 <script>
 "use strict";
-
 
 var df = require('date-fns'); // https://date-fns.org
 
@@ -524,10 +476,6 @@ module.exports = {
 			type: Boolean,
 			default: false
 		},
-		ranges: {
-			type: Array,
-			default: []
-		},
 		selection: {
 			type: Object,
 			default: function() {
@@ -609,14 +557,14 @@ module.exports = {
 		
 			var start = this.selection.start;
 			var end = this.selection.end;
-			var min = df.min(start, end);
-			var max = df.max(start, end);
+			var start = df.min(start, end);
+			var end = df.max(start, end);
 
 			var dateRange = this.getItemRange(date, type)
 
-			if ( !(df.isAfter(min, dateRange.start) || df.isBefore(max, dateRange.end)) )
+			if ( !(df.isAfter(start, dateRange.start) || df.isBefore(end, dateRange.end)) )
 				return 2;
-			if ( df.areRangesOverlapping(min, max, dateRange.start, dateRange.end) )
+			if ( df.areRangesOverlapping(start, end, dateRange.start, dateRange.end) )
 				return 1;
 			return 0;
 		},
@@ -660,9 +608,7 @@ module.exports = {
 			}
 			
 			var range = this.getItemRange(date, type);
-			
-			//console.log(date, type,  range )
-			this.$emit(ev.type, range, this.view, ev.buttons !== 0);
+			this.$emit('action', ev.type, ev.buttons !== 0, range, type);
 		},
 
 		move: function(dir) {
@@ -688,11 +634,6 @@ module.exports = {
 	},
 	created: function() {
 		
-		this.isWithinRangeExcludeEnd = function(dirtyDate, dirtyStartDate, dirtyEndDate) {
-			
-			return df.isWithinRange(dirtyDate, dirtyStartDate, dirtyEndDate) && !df.isEqual(dirtyDate, dirtyEndDate);
-		}
-				
 		this.df = df;
 		this.VIEW = VIEW;
 	}
