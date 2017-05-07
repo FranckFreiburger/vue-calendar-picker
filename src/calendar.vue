@@ -388,6 +388,10 @@ span[data-item]:hover {
 	line-height: 0;
 }
 
+.weekView > div:nth-child(4n+1) > span {
+	border-bottom: 1px dashed silver;
+}
+
 .weekView > div:first-child > span {
 	line-height: normal;
 }
@@ -459,6 +463,41 @@ function findDataAttr(elt, dataAttrName) {
 	return undefined;
 }
 
+function isSame(val1, val2) {
+	
+	if ( val1 === val2 )
+		return true;
+	
+	var type1 = typeof(val1);
+	if ( type1 !== typeof(val2) )
+		return false;
+/*		
+	if ( Array.isArray(val1) && Array.isArray(val1) ) {
+		
+		var len1 = val1.length;
+		if ( len1 !== val2.length )
+			return false;
+		for ( var i = 0; i < len1; ++i )
+			if ( !isSame(val1[i], val2[i]) )
+				return false;
+		return true;
+	}
+*/	
+	if ( type1 === 'object' && val1 !== null && val2 !== null ) {
+		
+		var k1 = Object.keys(val1);
+		var k1len = k1.length;
+		if ( Object.keys(val2).length !== k1len )
+			return false;
+
+		for ( var i = 0; i < k1len; ++i )
+			if ( !isSame(val1[k1[i]], val2[k1[i]]) )
+				return false;
+		return true;
+	}
+	return false;
+}
+
 var VIEW = {
 	HOUR: 3,
 	DAY: 4,
@@ -468,14 +507,15 @@ var VIEW = {
 	DECADE: 8,
 }
 
+
 module.exports = {
 	
 	directives: {
 		data: function(el, binding) {
 
-			if ( binding.value === binding.oldValue )
+			if ( isSame(binding.value, binding.oldValue) )
 				return;
-			el.dataset[binding.arg] = binding.modifiers.json === true ? JSON.stringify(binding.value) : binding.value;
+			el.dataset[binding.arg] = binding.modifiers.json === true ? JSON.stringify(binding.value) : String(binding.value);
 		}
 	},
 
@@ -500,7 +540,7 @@ module.exports = {
 		return {
 			animation: '',
 			locale: 'FR',
-			view: VIEW.DAY,
+			view: VIEW.MONTH,
 			current: df.startOfDay(Date.now()),
 			today: df.startOfDay(Date.now()),
 		}
@@ -621,7 +661,7 @@ module.exports = {
 			
 			var range = this.getItemRange(date, type);
 			
-			console.log(date, type,  range )
+			//console.log(date, type,  range )
 			this.$emit(ev.type, range, this.view, ev.buttons !== 0);
 		},
 
