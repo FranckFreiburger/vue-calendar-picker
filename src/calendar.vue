@@ -15,7 +15,7 @@
 					<template v-for="x in 2">
 						<span v-for="arg in [df.setHours(current, (y-1) + (x-1)*12 )]" v-data:item.json="[+arg, 'hour']" :class="[ 'selection'+selectionWhole(arg, 'hour') ]">
 							<span class="cellHead" v-text="df.format(arg, 'HH:mm')"></span>
-							<slot :arg="arg" type="hour"></slot>
+							<slot :item-range="getItemRange(arg, 'hour')" layout="vertical"></slot>
 						</span>
 					</template>
 				</div>
@@ -41,7 +41,7 @@
 							v-data:item.json="[+arg, 'hour']"
 							:class="[ { thisMonth: df.isSameMonth(current, arg) }, 'selection'+selectionWhole(arg, 'hour') ]"
 						>
-							<slot :arg="arg" type="hour"></slot>
+							<slot :item-range="getItemRange(arg, 'hour')" layout="vertical"></slot>
 						</span>
 					</template>
 				</div>
@@ -63,7 +63,7 @@
 							:class="[ { this: df.isSameDay(today, arg), notThisMonth: !df.isSameMonth(current, arg) }, 'selection'+selectionWhole(arg, 'day') ]"
 						>
 							<span class="cellHead" v-text="df.getDate(arg)"></span>
-							<slot :arg="arg" type="day"></slot>
+							<slot :item-range="getItemRange(arg, 'day')" layout="horizontal"></slot>
 						</span>
 					</template>
 				</div>
@@ -78,7 +78,7 @@
 							:class="[ { this: df.isSameMonth(today, arg) }, 'selection'+selectionWhole(arg, 'month') ]"
 						>
 							<span class="cellHead" v-text="format(arg, compact ? 'MMM' : 'MMMM')"></span>
-							<slot :arg="arg" type="month"></slot>
+							<slot :item-range="getItemRange(arg, 'month')" layout="horizontal"></slot>
 						</span>
 					</template>
 				</div>
@@ -354,7 +354,6 @@ span[data-item]:hover {
 
 .monthView > div > span {
 	height: 15%;
-	text-align: center;
 }
 
 .monthView > div:first-child > span {
@@ -365,6 +364,11 @@ span[data-item]:hover {
 .calendar:not(.compact) .monthView > div > span:first-child {
 	text-align: center;
 	font-weight: bold;
+}
+
+.monthView .cellHead {
+	text-align: center;
+	display: block;
 }
 
 .monthView .notThisMonth .cellHead {
@@ -488,7 +492,7 @@ module.exports = {
 		return {
 			animation: '',
 			locale: 'FR',
-			view: VIEW.MONTH,
+			view: VIEW.DAY,
 			current: df.startOfDay(Date.now()),
 			today: df.startOfDay(Date.now()),
 		}
