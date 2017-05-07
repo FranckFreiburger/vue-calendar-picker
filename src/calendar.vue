@@ -13,9 +13,13 @@
 			<div v-if="view === VIEW.DAY" class="view dayView timeVertical" :key="posId">
 				<div v-for="y in 12">
 					<template v-for="x in 2">
-						<span v-for="arg in [df.setHours(current, (y-1) + (x-1)*12 )]" v-data:item.json="[+arg, 'hour']" :class="[ 'selection'+selectionWhole(arg, 'hour') ]">
-							<span class="cellHead" v-text="df.format(arg, 'HH:mm')"></span>
-							<slot :item-range="getItemRange(arg, 'hour')" layout="vertical"></slot>
+						<span
+							v-for="range in [getItemRange(df.setHours(current, (y-1) + (x-1)*12 ), 'hour')]"
+							v-data:item.json="[+range.start, 'hour']"
+							:class="[ 'selection'+selectionWhole(range) ]"
+						>
+							<span class="cellHead" v-html="df.format(range.start, 'HH[<sup>]:mm[</sup>]')"></span>
+							<slot :item-range="range" layout="vertical"></slot>
 						</span>
 					</template>
 				</div>
@@ -37,11 +41,11 @@
 					<span v-text="y-1"></span>
 					<template v-for="x in 7">
 						<span
-							v-for="arg in [df.addHours(df.addDays(df.startOfWeek(current, { weekStartsOn: firstDayOfTheWeek }), x-1), y-1)]"
-							v-data:item.json="[+arg, 'hour']"
-							:class="[ { thisMonth: df.isSameMonth(current, arg) }, 'selection'+selectionWhole(arg, 'hour') ]"
+							v-for="range in [getItemRange(df.addHours(df.addDays(df.startOfWeek(current, { weekStartsOn: firstDayOfTheWeek }), x-1), y-1), 'hour')]"
+							v-data:item.json="[+range.start, 'hour']"
+							:class="[ { thisMonth: df.isSameMonth(current, range.start) }, 'selection'+selectionWhole(range) ]"
 						>
-							<slot :item-range="getItemRange(arg, 'hour')" layout="vertical"></slot>
+							<slot :item-range="range" layout="vertical"></slot>
 						</span>
 					</template>
 				</div>
@@ -54,16 +58,20 @@
 				</div>
 				<div v-for="y in compact ? visibleWeeks : 6">
 					<template v-for="week in [df.addDays(firstDayOfMonthView, (y-1) * 7)]">
-						<span v-if="!compact" v-data:item.json="[week, 'week']" v-text="df.getISOWeek(week)"></span>
+						<span
+							v-if="!compact"
+							v-data:item.json="[week, 'week']"
+							v-text="df.getISOWeek(week)"
+						></span>
 					</template>
 					<template v-for="x in 7">
 						<span
-							v-for="arg in [df.addDays(firstDayOfMonthView, (y-1) * 7 + (x-1))]"
-							v-data:item.json="[+arg, 'day']"
-							:class="[ { this: df.isSameDay(today, arg), notThisMonth: !df.isSameMonth(current, arg) }, 'selection'+selectionWhole(arg, 'day') ]"
+							v-for="range in [getItemRange(df.addDays(firstDayOfMonthView, (y-1) * 7 + (x-1)), 'day')]"
+							v-data:item.json="[+range.start, 'day']"
+							:class="[ { this: df.isSameDay(today, range.start), notThisMonth: !df.isSameMonth(current, range.start) }, 'selection'+selectionWhole(range) ]"
 						>
-							<span class="cellHead" v-text="df.getDate(arg)"></span>
-							<slot :item-range="getItemRange(arg, 'day')" layout="horizontal"></slot>
+							<span class="cellHead" v-text="df.getDate(range.start)"></span>
+							<slot :item-range="range" layout="horizontal"></slot>
 						</span>
 					</template>
 				</div>
@@ -73,12 +81,12 @@
 				<div v-for="y in 3">
 					<template v-for="x in 4">
 						<span
-							v-for="arg in [df.setMonth(current, (y-1)*4 + (x-1))]"
-							v-data:item.json="[+arg, 'month']"
-							:class="[ { this: df.isSameMonth(today, arg) }, 'selection'+selectionWhole(arg, 'month') ]"
+							v-for="range in [getItemRange(df.setMonth(current, (y-1)*4 + (x-1)), 'month')]"
+							v-data:item.json="[+range.start, 'month']"
+							:class="[ { this: df.isSameMonth(today, range.start) }, 'selection'+selectionWhole(range) ]"
 						>
-							<span class="cellHead" v-text="format(arg, compact ? 'MMM' : 'MMMM')"></span>
-							<slot :item-range="getItemRange(arg, 'month')" layout="horizontal"></slot>
+							<span class="cellHead" v-text="format(range.start, compact ? 'MMM' : 'MMMM')"></span>
+							<slot :item-range="range" layout="horizontal"></slot>
 						</span>
 					</template>
 				</div>
@@ -88,11 +96,11 @@
 				<div v-for="y in 4">
 					<template v-for="x in 4">
 						<span
-							v-for="arg in [df.addYears(current, (y-1)*4 + (x-1) - 9)]"
-							v-data:item.json="[+arg, 'year']"
-							:class="[ { this: df.isSameMonth(today, arg) }, 'selection'+selectionWhole(arg, 'year') ]"
+							v-for="range in [getItemRange(df.addYears(current, (y-1)*4 + (x-1) - 9), 'year')]"
+							v-data:item.json="[+range.start, 'year']"
+							:class="[ { this: df.isSameMonth(today, range.start) }, 'selection'+selectionWhole(range) ]"
 						>
-							<span class="cellHead" v-text="df.getYear(arg)"></span>
+							<span class="cellHead" v-text="df.getYear(range.start)"></span>
 						</span>
 					</template>
 				</div>
@@ -557,14 +565,12 @@ module.exports = {
 			}
 		},
 
-		selectionWhole: function(date, type) {
+		selectionWhole: function(dateRange) {
 		
 			var start = this.selection.start;
 			var end = this.selection.end;
 			var start = df.min(start, end);
 			var end = df.max(start, end);
-
-			var dateRange = this.getItemRange(date, type)
 
 			if ( !(df.isAfter(start, dateRange.start) || df.isBefore(end, dateRange.end)) )
 				return 2;
