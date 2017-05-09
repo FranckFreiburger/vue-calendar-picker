@@ -6,19 +6,35 @@
 			<span v-if="view === VIEW.WEEK" @click="view = VIEW.MONTH" v-text="'W'+df.getISOWeek(current)"></span>
 			<span v-if="view <= VIEW.MONTH" @click="view = VIEW.YEAR" v-text="format(current, 'MMM')"></span>
 			<span v-if="view <= VIEW.YEAR" @click="view = VIEW.DECADE" v-text="df.getYear(current)"></span>
+			<span v-if="view <= VIEW.HOUR" @click="view = VIEW.DAY">{{df.format(current, 'HH')}}<sup>h</sup></span>
 			<span class="next" @click="move(1)"></span>
 		</div>
 		<transition-group :name="animation" @after-enter="animation = ''" class="animation">
-		
+
+			<div v-if="view === VIEW.HOUR" class="view hourView timeVertical" :key="posId">
+				<div v-for="y in 15">
+					<template v-for="x in 4">
+						<span
+							v-for="range in [getItemRange(df.setMinutes(current, (y-1) + (x-1)*15 ), 'minute')]"
+							v-data:item.json="[+range.start/1000, 'minute']"
+							:class="[ 'selection'+selectionWhole(range) ]"
+						>
+							<span class="cellHead">{{df.format(range.start, 'mm')}}</span>
+							<slot :item-range="range" layout="vertical"></slot>
+						</span>
+					</template>
+				</div>
+			</div>
+
 			<div v-if="view === VIEW.DAY" class="view dayView timeVertical" :key="posId">
 				<div v-for="y in 12">
 					<template v-for="x in 2">
 						<span
 							v-for="range in [getItemRange(df.setHours(current, (y-1) + (x-1)*12 ), 'hour')]"
-							v-data:item.json="[+range.start, 'hour']"
+							v-data:item.json="[+range.start/1000, 'hour']"
 							:class="[ 'selection'+selectionWhole(range) ]"
 						>
-							<span class="cellHead" v-html="df.format(range.start, 'HH[<sup>]:mm[</sup>]')"></span>
+							<span class="cellHead">{{df.format(range.start, 'HH')}}<sup>h</sup></span>
 							<slot :item-range="range" layout="vertical"></slot>
 						</span>
 					</template>
@@ -31,10 +47,9 @@
 					<template v-for="x in 7">
 						<span
 							v-for="arg in [df.addDays(df.startOfWeek(current, { weekStartsOn: firstDayOfTheWeek }), x-1)]"
-							v-data:item.json="[+arg, 'day']"
+							v-data:item.json="[+arg/1000, 'day']"
 							:class="[ { this: df.isSameDay(today, arg) } ]"
-							v-text="format(arg, 'ddD')"
-						></span>
+						>{{format(arg, 'dd')}}<sub>{{df.getDate(arg)}}</sub></span>
 					</template>
 				</div>
 				<div v-for="y in 24">
@@ -42,7 +57,7 @@
 					<template v-for="x in 7">
 						<span
 							v-for="range in [getItemRange(df.addHours(df.addDays(df.startOfWeek(current, { weekStartsOn: firstDayOfTheWeek }), x-1), y-1), 'hour')]"
-							v-data:item.json="[+range.start, 'hour']"
+							v-data:item.json="[+range.start/1000, 'hour']"
 							:class="[ { thisMonth: df.isSameMonth(current, range.start) }, 'selection'+selectionWhole(range) ]"
 						>
 							<slot :item-range="range" layout="vertical"></slot>
@@ -60,14 +75,14 @@
 					<template v-for="week in [df.addDays(firstDayOfMonthView, (y-1) * 7)]">
 						<span
 							v-if="!compact"
-							v-data:item.json="[week, 'week']"
+							v-data:item.json="[+week/1000, 'week']"
 							v-text="df.getISOWeek(week)"
 						></span>
 					</template>
 					<template v-for="x in 7">
 						<span
 							v-for="range in [getItemRange(df.addDays(firstDayOfMonthView, (y-1) * 7 + (x-1)), 'day')]"
-							v-data:item.json="[+range.start, 'day']"
+							v-data:item.json="[+range.start/1000, 'day']"
 							:class="[ { this: df.isSameDay(today, range.start), notThisMonth: !df.isSameMonth(current, range.start) }, 'selection'+selectionWhole(range) ]"
 						>
 							<span class="cellHead" v-text="df.getDate(range.start)"></span>
@@ -82,7 +97,7 @@
 					<template v-for="x in 4">
 						<span
 							v-for="range in [getItemRange(df.setMonth(current, (y-1)*4 + (x-1)), 'month')]"
-							v-data:item.json="[+range.start, 'month']"
+							v-data:item.json="[+range.start/1000, 'month']"
 							:class="[ { this: df.isSameMonth(today, range.start) }, 'selection'+selectionWhole(range) ]"
 						>
 							<span class="cellHead" v-text="format(range.start, compact ? 'MMM' : 'MMMM')"></span>
@@ -97,7 +112,7 @@
 					<template v-for="x in 4">
 						<span
 							v-for="range in [getItemRange(df.addYears(current, (y-1)*4 + (x-1) - 9), 'year')]"
-							v-data:item.json="[+range.start, 'year']"
+							v-data:item.json="[+range.start/1000, 'year']"
 							:class="[ { this: df.isSameMonth(today, range.start) }, 'selection'+selectionWhole(range) ]"
 						>
 							<span class="cellHead" v-text="df.getYear(range.start)"></span>
@@ -211,8 +226,11 @@
 .calendar {
 	position: relative;
 
-	width: 17em;
-	height: 15em;
+	width: 19em;
+	height: 17em;
+	
+	font-family: arial;
+	font-size: 90%;
 
 	display: inline-block;
 	border: 2px solid #000;
@@ -298,7 +316,8 @@ span[data-item]:hover {
 }
 
 .this {
-	outline: 2px dotted #faa;
+	outline: 0.2em dotted #f55;
+	outline-offset: -0.2em;
 }
 
 .selection2 {
@@ -311,10 +330,12 @@ span[data-item]:hover {
 
 
 /* view */
+
 .view {
 	display: table;
 	width: 100%;
 	height: 100%;
+	line-height: 1;
 }
 
 .view > div {
@@ -323,26 +344,36 @@ span[data-item]:hover {
 
 .view > div > span {
 	display: table-cell;
+	vertical-align: top;
+}
+
+.cellHead {
+	vertical-align: top;
+}
+
+
+/* hour */
+
+.hourView .cellHead {
+	display: inline-block;
+	width: 1em;
+	font-size: 75%;
 }
 
 
 /* day */
 
-.dayView > div > span {
-	width: 50%;
-	height: 1%;
-}
-
 .dayView .cellHead {
 	margin-right: 0.5em;
-	vertical-align: top;
+	display: inline-block;
+	width: 1.25em;
 }
 
 
 /* week */
 
 .weekView > div > span {
-	line-height: 0;
+	line-height: 0.5;
 }
 
 .weekView > div:nth-child(4n+1) > span {
@@ -350,28 +381,34 @@ span[data-item]:hover {
 }
 
 .weekView > div:first-child > span {
-	line-height: normal;
+	width: 14%;
+	padding: 0.2em;
+	box-sizing: border-box;
+}
+
+.weekView > div > span:first-child {
+	width: 1em;
+	padding-right: 0.25em;
+	text-align: right;
+	
 }
 
 .weekView > div:nth-child(odd) > span:first-child {
-	font-size: 0;
+	visibility: hidden;
 }
 
 
 /* month */
 
-.monthView > div > span {
-	height: 15%;
-}
-
 .monthView > div:first-child > span {
-	height: 1%;
-	padding: 0 0.25em 0.25em 0.25em;
+	height: 1em;
+	padding: 0.25em;
 }
 
 .calendar:not(.compact) .monthView > div > span:first-child {
 	text-align: center;
 	font-weight: bold;
+	padding-right: 0.25em;
 }
 
 .monthView .cellHead {
@@ -427,7 +464,7 @@ function findDataAttr(elt, dataAttrName) {
 	return undefined;
 }
 
-function isSame(val1, val2) {
+function isEq(val1, val2) {
 	
 	if ( val1 === val2 )
 		return true;
@@ -442,7 +479,7 @@ function isSame(val1, val2) {
 		if ( len1 !== val2.length )
 			return false;
 		for ( var i = 0; i < len1; ++i )
-			if ( !isSame(val1[i], val2[i]) )
+			if ( !isEq(val1[i], val2[i]) )
 				return false;
 		return true;
 	}
@@ -455,7 +492,7 @@ function isSame(val1, val2) {
 			return false;
 
 		for ( var i = 0; i < k1len; ++i )
-			if ( !isSame(val1[k1[i]], val2[k1[i]]) )
+			if ( !isEq(val1[k1[i]], val2[k1[i]]) )
 				return false;
 		return true;
 	}
@@ -477,7 +514,7 @@ module.exports = {
 	directives: {
 		data: function(el, binding) {
 
-			if ( isSame(binding.value, binding.oldValue) )
+			if ( isEq(binding.value, binding.oldValue) )
 				return;
 			el.dataset[binding.arg] = binding.modifiers.json === true ? JSON.stringify(binding.value) : String(binding.value);
 		}
@@ -500,7 +537,7 @@ module.exports = {
 		return {
 			animation: '',
 			locale: 'FR',
-			view: VIEW.DAY,
+			view: VIEW.WEEK,
 			current: df.startOfDay(Date.now()),
 			today: df.startOfDay(Date.now()),
 		}
@@ -551,6 +588,8 @@ module.exports = {
 		getItemRange: function(date, type) {
 			
 			switch ( type ) {
+				case 'minute':
+					return { start: df.startOfMinute(date), end: df.startOfMinute(df.addMinutes(date, 1)) };
 				case 'hour':
 					return { start: df.startOfHour(date), end: df.startOfHour(df.addHours(date, 1)) };
 				case 'day':
@@ -585,7 +624,7 @@ module.exports = {
 			if ( value === undefined )
 				return;
 			
-			var date = df.parse(value[0]);
+			var date = df.parse(value[0]*1000);
 			var type = value[1];
 
 			if ( ev.type === 'click' ) {
@@ -605,6 +644,10 @@ module.exports = {
 			if ( ev.type === 'dblclick' ) {
 				
 				switch ( type ) {
+					case 'hour':
+						this.view = VIEW.HOUR;
+						this.current = date;
+						break;
 					case 'day':
 						this.view = VIEW.DAY;
 						this.current = date;
@@ -624,6 +667,9 @@ module.exports = {
 		move: function(dir) {
 			
 			switch ( this.view ) {
+				case VIEW.HOUR:
+					this.current = df.addHours(this.current, dir);
+					break;
 				case VIEW.DAY:
 					this.current = df.addDays(this.current, dir);
 					break;
