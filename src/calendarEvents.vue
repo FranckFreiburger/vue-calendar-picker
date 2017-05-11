@@ -1,5 +1,5 @@
 <template>
-	<calendar :ranges="ranges" :selection="selection" @action="action">
+	<calendar :ranges="ranges" :selection="selection" :item-class="itemClass" @action="action">
 		<template scope="p">
 			<div class="events">
 				<div
@@ -19,7 +19,7 @@
 	</calendar>
 </template>
 
-<style scoped>
+<style>
 
 /* events */
 
@@ -54,6 +54,7 @@
 .timeHorizontal .eventAt {
 }
 
+
 .timeVertical .events {
 	height: 100%;
 }
@@ -69,6 +70,19 @@
 .timeVertical .eventAt {
 	vertical-align: middle;
 }
+
+
+/* selection */
+
+.selection2 {
+	background-color: #cde;
+}
+
+.selection1 {
+	background-color: #def;
+}
+
+
 
 </style>
 
@@ -87,6 +101,10 @@ module.exports = {
 		compact: {
 		},
 		selection: {
+			type: Object,
+			default: function() {
+				return {}
+			}
 		},
 		ranges: {
 			type: Array,
@@ -94,6 +112,19 @@ module.exports = {
 		},
 	},
 	methods: {
+
+		itemClass: function(range) {
+			
+			var start = this.selection.start;
+			var end = this.selection.end;
+			var start = df.min(start, end);
+			var end = df.max(start, end);
+
+			if ( !(df.isAfter(start, range.start) || df.isBefore(end, range.end)) )
+				return 'selection'+2;
+			if ( df.areRangesOverlapping(start, end, range.start, range.end) )
+				return 'selection'+1;
+		},
 		
 		eventStyle: function(event, itemRange, layout) {
 			
@@ -117,9 +148,9 @@ module.exports = {
 				return { top: uiOffset, height: uiSize };
 		},
 	
-		action: function(type, active, range, rangeType) {
+		action: function(type, mouseActive, keyActive, range, rangeType) {
 			
-			this.$emit('action', type, active, range, rangeType);
+			this.$emit('action', type, mouseActive, keyActive, range, rangeType);
 		}	
 	},
 	created: function() {

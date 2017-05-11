@@ -1,5 +1,5 @@
 <template>
-	<div class="calendar" :class="{ compact: compact }" @click="mouse" @dblclick="mouse" @mousedown="mouse" @mouseup="mouse" @mouseover="mouse">
+	<div class="calendar" :class="{ compact: compact }" @click="mouse" @dblclick="mouse" @mousedown="mouse" @mouseup="mouse" @mouseover="mouse" @mouseout="mouse">
 		<div class="nav">
 			<span class="prev" @click="move(-1)"></span>
 			<span v-if="view <= VIEW.DAY" @click="view = VIEW.MONTH" v-text="df.getDate(current)"></span>
@@ -16,8 +16,8 @@
 					<template v-for="x in 4">
 						<span
 							v-for="range in [getItemRange(df.setMinutes(current, (y-1) + (x-1)*15 ), 'minute')]"
-							v-data:item.json="[+range.start/1000, 'minute']"
-							:class="[ 'selection'+selectionWhole(range) ]"
+							v-data:item.json="[+range.start/10000, 'minute']"
+							:class="[ { this: df.isSameMinute(today, range.start) }, itemClass(range) ]"
 						>
 							<span class="cellHead">{{df.format(range.start, 'mm')}}</span>
 							<slot :item-range="range" layout="vertical"></slot>
@@ -31,8 +31,8 @@
 					<template v-for="x in 2">
 						<span
 							v-for="range in [getItemRange(df.setHours(current, (y-1) + (x-1)*12 ), 'hour')]"
-							v-data:item.json="[+range.start/1000, 'hour']"
-							:class="[ 'selection'+selectionWhole(range) ]"
+							v-data:item.json="[+range.start/10000, 'hour']"
+							:class="[ { this: df.isSameHour(today, range.start) }, itemClass(range) ]"
 						>
 							<span class="cellHead">{{df.format(range.start, 'HH')}}<sup>h</sup></span>
 							<slot :item-range="range" layout="vertical"></slot>
@@ -47,7 +47,7 @@
 					<template v-for="x in 7">
 						<span
 							v-for="arg in [df.addDays(df.startOfWeek(current, { weekStartsOn: firstDayOfTheWeek }), x-1)]"
-							v-data:item.json="[+arg/1000, 'day']"
+							v-data:item.json="[+arg/10000, 'day']"
 							:class="[ { this: df.isSameDay(today, arg) } ]"
 						>{{format(arg, 'dd')}}<sub>{{df.getDate(arg)}}</sub></span>
 					</template>
@@ -57,8 +57,8 @@
 					<template v-for="x in 7">
 						<span
 							v-for="range in [getItemRange(df.addHours(df.addDays(df.startOfWeek(current, { weekStartsOn: firstDayOfTheWeek }), x-1), y-1), 'hour')]"
-							v-data:item.json="[+range.start/1000, 'hour']"
-							:class="[ { thisMonth: df.isSameMonth(current, range.start) }, 'selection'+selectionWhole(range) ]"
+							v-data:item.json="[+range.start/10000, 'hour']"
+							:class="[ { thisMonth: df.isSameMonth(current, range.start) }, itemClass(range) ]"
 						>
 							<slot :item-range="range" layout="vertical"></slot>
 						</span>
@@ -75,15 +75,15 @@
 					<template v-for="week in [df.addDays(firstDayOfMonthView, (y-1) * 7)]">
 						<span
 							v-if="!compact"
-							v-data:item.json="[+week/1000, 'week']"
+							v-data:item.json="[+week/10000, 'week']"
 							v-text="df.getISOWeek(week)"
 						></span>
 					</template>
 					<template v-for="x in 7">
 						<span
 							v-for="range in [getItemRange(df.addDays(firstDayOfMonthView, (y-1) * 7 + (x-1)), 'day')]"
-							v-data:item.json="[+range.start/1000, 'day']"
-							:class="[ { this: df.isSameDay(today, range.start), notThisMonth: !df.isSameMonth(current, range.start) }, 'selection'+selectionWhole(range) ]"
+							v-data:item.json="[+range.start/10000, 'day']"
+							:class="[ { this: df.isSameDay(today, range.start), notThisMonth: !df.isSameMonth(current, range.start) }, itemClass(range) ]"
 						>
 							<span class="cellHead" v-text="df.getDate(range.start)"></span>
 							<slot :item-range="range" layout="horizontal"></slot>
@@ -97,8 +97,8 @@
 					<template v-for="x in 4">
 						<span
 							v-for="range in [getItemRange(df.setMonth(current, (y-1)*4 + (x-1)), 'month')]"
-							v-data:item.json="[+range.start/1000, 'month']"
-							:class="[ { this: df.isSameMonth(today, range.start) }, 'selection'+selectionWhole(range) ]"
+							v-data:item.json="[+range.start/10000, 'month']"
+							:class="[ { this: df.isSameMonth(today, range.start) }, itemClass(range) ]"
 						>
 							<span class="cellHead" v-text="format(range.start, compact ? 'MMM' : 'MMMM')"></span>
 							<slot :item-range="range" layout="horizontal"></slot>
@@ -112,8 +112,8 @@
 					<template v-for="x in 4">
 						<span
 							v-for="range in [getItemRange(df.addYears(current, (y-1)*4 + (x-1) - 9), 'year')]"
-							v-data:item.json="[+range.start/1000, 'year']"
-							:class="[ { this: df.isSameMonth(today, range.start) }, 'selection'+selectionWhole(range) ]"
+							v-data:item.json="[+range.start/10000, 'year']"
+							:class="[ { this: df.isSameYear(today, range.start) }, itemClass(range) ]"
 						>
 							<span class="cellHead" v-text="df.getYear(range.start)"></span>
 						</span>
@@ -289,9 +289,14 @@
 	content: '\2192';
 }
 
+
 .compact .nav {
-	height: 1em;
+	height: 2em;
 	margin-top: 0;
+}
+
+.compact .nav sup {
+	vertical-align: initial;
 }
 
 .compact .nav > span {
@@ -309,23 +314,15 @@
 }
 
 
-/* selection */
+/* highlighting */
 
 span[data-item]:hover {
 	background-color: #eee;
 }
 
 .this {
-	outline: 0.2em dotted #f55;
-	outline-offset: -0.2em;
-}
-
-.selection2 {
-	background-color: #cde;
-}
-
-.selection1 {
-	background-color: #def;
+	outline: 1px dotted #f55;
+	outline-offset: -1px;
 }
 
 
@@ -403,6 +400,7 @@ span[data-item]:hover {
 .monthView > div:first-child > span {
 	height: 1em;
 	padding: 0.25em;
+	text-align: center;
 }
 
 .calendar:not(.compact) .monthView > div > span:first-child {
@@ -472,18 +470,7 @@ function isEq(val1, val2) {
 	var type1 = typeof(val1);
 	if ( type1 !== typeof(val2) )
 		return false;
-/*		
-	if ( Array.isArray(val1) && Array.isArray(val1) ) {
-		
-		var len1 = val1.length;
-		if ( len1 !== val2.length )
-			return false;
-		for ( var i = 0; i < len1; ++i )
-			if ( !isEq(val1[i], val2[i]) )
-				return false;
-		return true;
-	}
-*/	
+
 	if ( type1 === 'object' && val1 !== null && val2 !== null ) {
 		
 		var k1 = Object.keys(val1);
@@ -521,25 +508,36 @@ module.exports = {
 	},
 
 	props: {
+		locale: {
+			type: String,
+			default: navigator.language.toUpperCase(), 	
+		},
 		compact: {
 			type: Boolean,
 			default: false
 		},
-		selection: {
-			type: Object,
+		initialView: {
+			type: Number,
+			default: VIEW.MONTH,
+		},
+		initialCurrent: {
+			type: Date,
 			default: function() {
-				return {}
+				return new Date
 			}
-		}
+		},
+		itemClass: {
+			type: Function,
+			default: function() {},
+		},
 	},
 	
 	data: function() {
 		return {
 			animation: '',
-			locale: 'FR',
-			view: VIEW.WEEK,
-			current: df.startOfDay(Date.now()),
-			today: df.startOfDay(Date.now()),
+			view: this.initialView,
+			current: this.initialCurrent,
+			today: new Date,
 		}
 	},
 
@@ -583,6 +581,11 @@ module.exports = {
 		format: function(date, format) {
 			
 			return df.format(date, format, { locale: locales[this.locale] })
+
+			/* unable to setup this (see https://webpack.github.io/docs/context.html#dynamic-requires and date-fns structure)
+			var req = require.context('date-fns/locale', true, /^\.\//);
+			return df.format(date, format, { locale: req('./'+this.locale.toLowerCase()) });
+			*/
 		},
 		
 		getItemRange: function(date, type) {
@@ -604,18 +607,28 @@ module.exports = {
 			}
 		},
 
-		selectionWhole: function(dateRange) {
-		
-			var start = this.selection.start;
-			var end = this.selection.end;
-			var start = df.min(start, end);
-			var end = df.max(start, end);
-
-			if ( !(df.isAfter(start, dateRange.start) || df.isBefore(end, dateRange.end)) )
-				return 2;
-			if ( df.areRangesOverlapping(start, end, dateRange.start, dateRange.end) )
-				return 1;
-			return 0;
+		move: function(dir) {
+			
+			switch ( this.view ) {
+				case VIEW.HOUR:
+					this.current = df.addHours(this.current, dir);
+					break;
+				case VIEW.DAY:
+					this.current = df.addDays(this.current, dir);
+					break;
+				case VIEW.WEEK:
+					this.current = df.addWeeks(this.current, dir);
+					break;
+				case VIEW.MONTH:
+					this.current = df.addMonths(this.current, dir);
+					break;
+				case VIEW.YEAR:
+					this.current = df.addYears(this.current, dir);
+					break;
+				case VIEW.DECADE:
+					this.current = df.addYears(this.current, 12 * dir);
+					break;
+			}
 		},
 
 		mouse: function(ev) {
@@ -624,7 +637,7 @@ module.exports = {
 			if ( value === undefined )
 				return;
 			
-			var date = df.parse(value[0]*1000);
+			var date = df.parse(value[0]*10000); // 10000: currently, min resolution is "minute"
 			var type = value[1];
 
 			if ( ev.type === 'click' ) {
@@ -661,34 +674,15 @@ module.exports = {
 			}
 			
 			var range = this.getItemRange(date, type);
-			this.$emit('action', ev.type, ev.buttons !== 0, range, type);
-		},
-
-		move: function(dir) {
 			
-			switch ( this.view ) {
-				case VIEW.HOUR:
-					this.current = df.addHours(this.current, dir);
-					break;
-				case VIEW.DAY:
-					this.current = df.addDays(this.current, dir);
-					break;
-				case VIEW.WEEK:
-					this.current = df.addWeeks(this.current, dir);
-					break;
-				case VIEW.MONTH:
-					this.current = df.addMonths(this.current, dir);
-					break;
-				case VIEW.YEAR:
-					this.current = df.addYears(this.current, dir);
-					break;
-				case VIEW.DECADE:
-					this.current = df.addYears(this.current, 12 * dir);
-					break;
-			}
-		}
+			var keyActive = ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey;
+			var mouseActive = ev.buttons !== 0;
+			this.$emit('action', ev.type, mouseActive, keyActive, range, type);
+		},
 	},
 	created: function() {
+		
+		this._longPress = 0;
 		
 		this.df = df;
 		this.VIEW = VIEW;
