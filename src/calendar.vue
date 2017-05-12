@@ -702,8 +702,6 @@ module.exports = {
 	},
 	created: function() {
 		
-		this._longPress = 0;
-		
 		this.df = df;
 		this.VIEW = VIEW;
 	}
