@@ -227,16 +227,14 @@
 
 .calendar {
 	position: relative;
-
-	width: 19em;
-	height: 17em;
+	
+	width: 18em;
+	height: 13em;
 	
 	font-family: arial;
 	font-size: 90%;
 
 	display: inline-block;
-	border: 2px solid #000;
-	border-radius: 0.25em;
 	cursor: default;
 	user-select: none;
 	padding-top: 2.5em;
@@ -246,15 +244,13 @@
 	padding-top: 1em;
 }
 
-</style>
 
-
-<style>
 /* nav */
 
 .calendar .nav {
 	position: absolute;
 	top: 0;
+	left: 0;
 	width: 100%;
 	height: 2.5em;
 	text-align: center;
