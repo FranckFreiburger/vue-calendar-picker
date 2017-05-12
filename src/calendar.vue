@@ -1,13 +1,15 @@
 <template>
 	<div class="calendar" :class="{ compact: compact }" @click="mouse" @dblclick="mouse" @mousedown="mouse" @mouseup="mouse" @mouseover="mouse" @mouseout="mouse">
 		<div class="nav">
-			<span class="prev" @click="move(-1)"></span>
-			<span v-if="view <= VIEW.DAY" @click="view = VIEW.MONTH" v-text="df.getDate(current)"></span>
-			<span v-if="view === VIEW.WEEK" @click="view = VIEW.MONTH" v-text="'W'+df.getISOWeek(current)"></span>
-			<span v-if="view <= VIEW.MONTH" @click="view = VIEW.YEAR" v-text="format(current, 'MMM')"></span>
+			<span class="prev" @click="move(-1)" @mouseenter="$event.buttons !== 0 && moveEnter(-1)" @mouseleave="moveLeave()"></span>
+
 			<span v-if="view <= VIEW.YEAR" @click="view = VIEW.DECADE" v-text="df.getYear(current)"></span>
+			<span v-if="view <= VIEW.MONTH" @click="view = VIEW.YEAR" v-text="format(current, 'MMM')"></span>
+			<span v-if="view === VIEW.WEEK" @click="view = VIEW.MONTH" v-text="'W'+df.getISOWeek(current)"></span>
+			<span v-if="view <= VIEW.DAY" @click="view = VIEW.MONTH" v-text="df.getDate(current)"></span>
 			<span v-if="view <= VIEW.HOUR" @click="view = VIEW.DAY">{{df.format(current, 'HH')}}<sup>h</sup></span>
-			<span class="next" @click="move(1)"></span>
+
+			<span class="next" @click="move(1)" @mouseenter="$event.buttons !== 0 && moveEnter(1)" @mouseleave="moveLeave()"></span>
 		</div>
 		<transition-group :name="animation" @after-enter="animation = ''" class="animation">
 
@@ -631,6 +633,24 @@ module.exports = {
 			}
 		},
 
+		moveEnter: function(dir) {
+			
+			var startMove = function(timeout) {
+
+				this.move(dir);
+				this.moveInterval = setTimeout(function() {
+					
+					startMove(Math.max(timeout * 0.9, 250));
+				}, timeout);
+			}.bind(this);
+			startMove(750);
+		},
+		
+		moveLeave: function() {
+			
+			clearTimeout(this.moveInterval);
+		},
+		
 		mouse: function(ev) {
 			
 			var value = findDataAttr(ev.target, 'item');
