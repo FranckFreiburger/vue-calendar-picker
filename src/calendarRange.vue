@@ -1,7 +1,7 @@
 <template>
 	<div style="user-select: none">
-		<calendar-events :compact="compact" :ranges="ranges" :selection="selection" @action="actionLeft"></calendar-events><!--
-	 --><calendar-events :compact="compact" :ranges="ranges" :selection="selection" @action="actionRight"></calendar-events>
+		<calendar-events :compact="compact" :events="events" :selection="selection" @action="actionLeft"></calendar-events><!--
+	 --><calendar-events :compact="compact" :events="events" :selection="selection" @action="actionRight"></calendar-events>
 	</div>
 </template>
 
@@ -19,7 +19,7 @@ module.exports = {
 	props: {
 		compact: {
 		},
-		ranges: {
+		events: {
 		},
 		selection: {
 			type: Object,

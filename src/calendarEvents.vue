@@ -1,16 +1,16 @@
 <template>
-	<calendar :ranges="ranges" :selection="selection" :item-class="itemClass" @action="action">
+	<calendar :events="events" :selection="selection" :item-class="itemClass" @action="action">
 		<template scope="p">
 			<div class="events">
 				<div
 					class="eventRange"
-					v-for="event in ranges"
+					v-for="event in events"
 					v-if="!df.isEqual(event.start, event.end) && df.areRangesOverlapping(event.start, event.end, p.itemRange.start, p.itemRange.end)"
 					:style="[ { backgroundColor: event.color }, eventStyle(event, p.itemRange, p.layout) ]"
 				></div>
 				<div
 					class="eventAt"
-					v-for="event in ranges"
+					v-for="event in events"
 					v-if="df.isEqual(event.start, event.end) && dateIsSame(p.arg, event.start, p.type)"
 					:style="{ backgroundColor: event.color }"
 				></div>
@@ -104,7 +104,7 @@ module.exports = {
 				return {}
 			}
 		},
-		ranges: {
+		events: {
 			type: Array,
 			default: []
 		},
