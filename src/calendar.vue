@@ -451,10 +451,14 @@ function firstDayOfTheWeek(locale) {
 	return 1; // mon
 }
 
-var locales = {
-	FR: require('date-fns/locale/fr'),
-	RU: require('date-fns/locale/ru'),
+var localeCache = {};
+function getLocale(localeId) {
+	
+	if ( !(localeId in localeCache) )
+		localeCache[localeId] = require('date-fns/locale/'+localeId.toLowerCase()+'/index.js');
+	return localeCache[localeId];
 }
+
 
 function findDataAttr(elt, dataAttrName) {
 	
@@ -581,13 +585,8 @@ module.exports = {
 	
 	methods: {
 		format: function(date, format) {
-			
-			return df.format(date, format, { locale: locales[this.locale] })
 
-			/* unable to setup this (see https://webpack.github.io/docs/context.html#dynamic-requires and date-fns structure)
-			var req = require.context('date-fns/locale', true, /^\.\//);
-			return df.format(date, format, { locale: req('./'+this.locale.toLowerCase()) });
-			*/
+			return df.format(date, format, { locale: getLocale(this.locale) });
 		},
 		
 		getItemRange: function(date, type) {
