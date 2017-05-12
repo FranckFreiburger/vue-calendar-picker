@@ -48,6 +48,7 @@
 	display: block;
 	margin: 2px 0;
 	width: 100%;
+	min-width: 10px;
 	height: 2px;
 }
 
@@ -64,6 +65,7 @@
 	margin: 0 2px;
 	width: 2px;
 	height: 100%;
+	min-height: 10px;
 	vertical-align: top;
 }
 
