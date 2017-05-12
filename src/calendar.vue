@@ -229,7 +229,7 @@
 	position: relative;
 	
 	width: 18em;
-	height: 13em;
+	height: 16em;
 	
 	font-family: arial;
 	font-size: 90%;
@@ -655,7 +655,10 @@ module.exports = {
 			var date = df.parse(value[0]*10000); // 10000: currently, min resolution is "minute"
 			var type = value[1];
 
-			if ( ev.type === 'click' ) {
+			var keyActive = ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey;
+			var mouseActive = ev.buttons !== 0;
+
+			if ( !keyActive && ev.type === 'click' ) {
 				
 				switch ( type ) {
 					case 'month':
@@ -669,7 +672,7 @@ module.exports = {
 				}
 			}
 			
-			if ( ev.type === 'dblclick' ) {
+			if ( !keyActive && ev.type === 'dblclick' ) {
 				
 				switch ( type ) {
 					case 'hour':
@@ -690,8 +693,6 @@ module.exports = {
 			
 			var range = this.getItemRange(date, type);
 			
-			var keyActive = ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey;
-			var mouseActive = ev.buttons !== 0;
 			this.$emit('action', ev.type, mouseActive, keyActive, range, type);
 		},
 	},
