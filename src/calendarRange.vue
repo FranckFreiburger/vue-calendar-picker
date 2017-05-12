@@ -1,19 +1,9 @@
 <template>
-	<div class="range">
+	<div style="user-select: none">
 		<calendar-events :compact="compact" :ranges="ranges" :selection="selection" @action="actionLeft"></calendar-events><!--
 	 --><calendar-events :compact="compact" :ranges="ranges" :selection="selection" @action="actionRight"></calendar-events>
-	 <div>{{selection.start.toString()}}</div>
-	 <div>{{selection.end.toString()}}</div>
 	</div>
 </template>
-
-<style scoped>
-
-	.range {
-		user-select: none;
-	}
-
-</style>
 
 <script>
 "use strict";

@@ -23,27 +23,27 @@
 
 /* events */
 
-.view .events {
+.calendar .view .events {
 	display: inline-block;
 }
 
-.view .eventRange {
+.calendar .view .eventRange {
 	display: inline-block;
 }
 
-.view .eventAt {
+.calendar .view .eventAt {
 	display: inline-block;
 	margin: 1px;
 	width: 4px;
 	height: 4px;
 }
 
-.timeHorizontal .events {
+.calendar .timeHorizontal .events {
 	width: 100%;
 	vertical-align: top;
 }
 
-.timeHorizontal .eventRange {
+.calendar .timeHorizontal .eventRange {
 	position: relative;
 	display: block;
 	margin: 2px 0;
@@ -51,15 +51,15 @@
 	height: 2px;
 }
 
-.timeHorizontal .eventAt {
+.calendar .timeHorizontal .eventAt {
 }
 
 
-.timeVertical .events {
+.calendar .timeVertical .events {
 	height: 100%;
 }
 
-.timeVertical .eventRange {
+.calendar .timeVertical .eventRange {
 	position: relative;
 	margin: 0 2px;
 	width: 2px;
@@ -67,22 +67,20 @@
 	vertical-align: top;
 }
 
-.timeVertical .eventAt {
+.calendar .timeVertical .eventAt {
 	vertical-align: middle;
 }
 
 
 /* selection */
 
-.selection2 {
+.calendar .selection2 {
 	background-color: #cde;
 }
 
-.selection1 {
+.calendar .selection1 {
 	background-color: #def;
 }
-
-
 
 </style>
 

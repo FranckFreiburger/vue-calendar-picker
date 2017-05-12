@@ -126,29 +126,29 @@
 	</div>
 </template>
 
-<style scoped>
+<style>
 
-.forwardSlide-enter-active {
+.calendar .forwardSlide-enter-active {
 	position: absolute;
-	animation: slide-out .5s ease;
+	animation: calendar-slide-out .5s ease;
 }
 
-.forwardSlide-leave-active {
+.calendar .forwardSlide-leave-active {
 	position: absolute;
-	animation: slide-in .5s ease;
+	animation: calendar-slide-in .5s ease;
 }
 
-.reverseSlide-enter-active {
+.calendar .reverseSlide-enter-active {
 	position: absolute;
-	animation: slide-in .5s ease-in reverse;
+	animation: calendar-slide-in .5s ease-in reverse;
 }
 
-.reverseSlide-leave-active {
+.calendar .reverseSlide-leave-active {
 	position: absolute;
-	animation: slide-out .5s ease-in reverse;
+	animation: calendar-slide-out .5s ease-in reverse;
 }
 
-@keyframes slide-in {
+@keyframes calendar-slide-in {
 	from {
 		transform: translateX(0%);
 		opacity: 1;
@@ -159,7 +159,7 @@
 	}
 }
 
-@keyframes slide-out {
+@keyframes calendar-slide-out {
 	from {
 		transform: translateX(100%);
 		opacity: 0;
@@ -171,32 +171,32 @@
 }
 
 
-.forwardScale-enter-active {
+.calendar .forwardScale-enter-active {
 	position: relative;
-	animation: scale-out .5s ease;
+	animation: calendar-scale-out .5s ease;
 	transform-origin: 50% 50%;
 }
 
-.forwardScale-leave-active {
+.calendar .forwardScale-leave-active {
 	position: absolute;
-	animation: scale-in .5s ease;
+	animation: calendar-scale-in .5s ease;
 	transform-origin: 50% 50%;
 }
 
-.reverseScale-enter-active {
+.calendar .reverseScale-enter-active {
 	position: relative;
-	animation: scale-in .5s ease-in reverse;
+	animation: calendar-scale-in .5s ease-in reverse;
 	transform-origin: 50% 50%;
 }
 
-.reverseScale-leave-active {
+.calendar .reverseScale-leave-active {
 	position: absolute;
-	animation: scale-out .5s ease-in reverse;
+	animation: calendar-scale-out .5s ease-in reverse;
 	transform-origin: 50% 50%;
 }
 
 
-@keyframes scale-in {
+@keyframes calendar-scale-in {
 	from {
 		transform: scale(1);
 		opacity: 1;
@@ -207,7 +207,7 @@
 	}
 }
 
-@keyframes scale-out {
+@keyframes calendar-scale-out {
 	from {
 		transform: scale(1.5);
 		opacity: 0;
@@ -218,7 +218,7 @@
 	}
 }
 
-.animation {
+.calendar .animation {
 	display: block;
 	position: relative;
 	height: 100%;
@@ -252,7 +252,7 @@
 <style>
 /* nav */
 
-.nav {
+.calendar .nav {
 	position: absolute;
 	top: 0;
 	width: 100%;
@@ -260,7 +260,7 @@
 	text-align: center;
 }
 
-.nav > span {
+.calendar .nav > span {
 	box-sizing: border-box;
 	display: inline-block;
 	height: 100%;
@@ -268,49 +268,49 @@
 	cursor: pointer;
 }
 
-.nav .prev,
-.nav .next {
+.calendar .nav .prev,
+.calendar .nav .next {
 	font-size: 150%;
 	font-weight: bold;
 	margin-top: -0.3em;
 }
 
-.nav .prev {
+.calendar .nav .prev {
 	float: left;
 }
 
-.nav .next {
+.calendar .nav .next {
 	float: right;
 }
 
-.nav .prev:before {
+.calendar .nav .prev:before {
 	content: '\2190';
 }
 
-.nav .next:before {
+.calendar .nav .next:before {
 	content: '\2192';
 }
 
 
-.compact .nav {
+.calendar .compact .nav {
 	height: 2em;
 	margin-top: 0;
 }
 
-.compact .nav sup {
+.calendar .compact .nav sup {
 	vertical-align: initial;
 }
 
-.compact .nav > span {
+.calendar .compact .nav > span {
 	padding: 0;
 }
 
-.compact .nav .prev {
+.calendar .compact .nav .prev {
 	left: 0.25em;
 	text-align: left;
 }
 
-.compact .nav .next {
+.calendar .compact .nav .next {
 	right: 0.25em;
 	text-align: right;
 }
@@ -318,11 +318,11 @@
 
 /* highlighting */
 
-span[data-item]:hover {
+.calendar span[data-item]:hover {
 	background-color: #eee;
 }
 
-.this {
+.calendar .this {
 	outline: 1px dotted #f55;
 	outline-offset: -1px;
 }
@@ -330,23 +330,23 @@ span[data-item]:hover {
 
 /* view */
 
-.view {
+.calendar .view {
 	display: table;
 	width: 100%;
 	height: 100%;
 	line-height: 1;
 }
 
-.view > div {
+.calendar .view > div {
 	display: table-row;
 }
 
-.view > div > span {
+.calendar .view > div > span {
 	display: table-cell;
 	vertical-align: top;
 }
 
-.cellHead {
+.calendar .cellHead {
 	vertical-align: top;
 }
 
@@ -362,7 +362,7 @@ span[data-item]:hover {
 
 /* day */
 
-.dayView .cellHead {
+.calendar .dayView .cellHead {
 	margin-right: 0.5em;
 	display: inline-block;
 	width: 1.25em;
@@ -371,35 +371,34 @@ span[data-item]:hover {
 
 /* week */
 
-.weekView > div > span {
+.calendar .weekView > div > span {
 	line-height: 0.5;
 }
 
-.weekView > div:nth-child(4n+1) > span {
+.calendar .weekView > div:nth-child(4n+1) > span {
 	border-bottom: 1px dashed silver;
 }
 
-.weekView > div:first-child > span {
+.calendar .weekView > div:first-child > span {
 	width: 14%;
 	padding: 0.2em;
 	box-sizing: border-box;
 }
 
-.weekView > div > span:first-child {
+.calendar .weekView > div > span:first-child {
 	width: 1em;
 	padding-right: 0.25em;
 	text-align: right;
-	
 }
 
-.weekView > div:nth-child(odd) > span:first-child {
+.calendar .weekView > div:nth-child(odd) > span:first-child {
 	visibility: hidden;
 }
 
 
 /* month */
 
-.monthView > div:first-child > span {
+.calendar .monthView > div:first-child > span {
 	height: 1em;
 	padding: 0.25em;
 	text-align: center;
@@ -411,30 +410,31 @@ span[data-item]:hover {
 	padding-right: 0.25em;
 }
 
-.monthView .cellHead {
+.calendar .monthView .cellHead {
 	text-align: center;
 	display: block;
 }
 
-.monthView .notThisMonth .cellHead {
+.calendar .monthView .notThisMonth .cellHead {
 	color: silver;
 }
 
 
 /* yearView / decadeView */
 
-.yearView > div > span,
-.decadeView > div > span {
+.calendar .yearView > div > span,
+.calendar .decadeView > div > span {
 	text-align: center;
 	vertical-align: middle;
 }
 
-.yearView .cellHead,
-.decadeView .cellHead {
+.calendar .yearView .cellHead,
+.calendar .decadeView .cellHead {
 	padding: 0.25em;
 }
 
 </style>
+
 <script>
 "use strict";
 
@@ -627,7 +627,7 @@ module.exports = {
 					this.current = df.addYears(this.current, dir);
 					break;
 				case VIEW.DECADE:
-					this.current = df.addYears(this.current, 12 * dir);
+					this.current = df.addYears(this.current, 16 * dir);
 					break;
 			}
 		},
@@ -679,17 +679,17 @@ module.exports = {
 					case 'hour':
 						this.view = VIEW.HOUR;
 						this.current = date;
-						break;
+						return;
 					case 'day':
 						this.view = VIEW.DAY;
 						this.current = date;
-						break;
+						return;
 					case 'week':
 						this.view = VIEW.WEEK;
 						this.current = date;
-						break;
+						return;
 				}
-				return;
+				
 			}
 			
 			var range = this.getItemRange(date, type);
