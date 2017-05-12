@@ -38,6 +38,9 @@
 	height: 4px;
 }
 
+
+/* horizontal layout */
+
 .calendar .timeHorizontal .events {
 	width: 100%;
 	vertical-align: top;
@@ -57,6 +60,8 @@
 	vertical-align: top;
 }
 
+
+/* vertical layout */
 
 .calendar .timeVertical .events {
 	height: 100%;
