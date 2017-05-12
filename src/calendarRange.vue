@@ -1,7 +1,7 @@
 <template>
 	<div class="range">
-		<calendar-events :compact="compact" :ranges="ranges" :selection="selection" @action="action"></calendar-events><!--
-	 --><calendar-events :compact="compact" :ranges="ranges" :selection="selection" @action="action"></calendar-events>
+		<calendar-events :compact="compact" :ranges="ranges" :selection="selection" @action="actionLeft"></calendar-events><!--
+	 --><calendar-events :compact="compact" :ranges="ranges" :selection="selection" @action="actionRight"></calendar-events>
 	 <div>{{selection.start.toString()}}</div>
 	 <div>{{selection.end.toString()}}</div>
 	</div>
@@ -38,53 +38,55 @@ module.exports = {
 	},
 	data: function() {
 		return {
-			selectStart: null
+			ref: null,
 		}
 	},
 	methods: {
-		action: function(type, mouseActive, keyActive, range, rangeType) {
+		action: function(side, type, mouseActive, keyActive, range, rangeType) {
 
 			if ( type === 'mousedown' ) {
 				
-				if ( !keyActive ) {
+				if ( keyActive ) {
 					
-					this.selectStart = range;
-				} else {
-					
-					if ( Math.abs(df.differenceInMilliseconds(range.start, this.selection.start)) < Math.abs(df.differenceInMilliseconds(range.end, this.selection.end)) )
-						this.selection.start = range.start;
-					else
-						this.selection.end = range.end;
+					var rangeLength = df.differenceInMilliseconds(range.end, range.start);
+					var midRange = df.addMilliseconds(range.start, rangeLength/2);
+					var midSel = df.addMilliseconds(this.selection.start, df.differenceInMilliseconds(this.selection.end, this.selection.start)/2);
+
+					if ( df.isBefore(midRange, midSel) ) {
+
+						this.ref = { start: df.subMilliseconds(this.selection.end, rangeLength), end: this.selection.end }
+						this.selection.start = df.min(range.start, this.ref.start);
+					} else {
+
+						this.ref = { start: this.selection.start, end: df.addMilliseconds(this.selection.start, rangeLength) }
+						this.selection.end = df.max(range.end, this.ref.end);
+					}
 					return;
 				}
+
+				this.ref = range;
 			}
 
 			if ( type === 'mouseup' )
-				this.selectStart = null;
+				this.ref = null;
 
 			if ( type === 'mouseover' && mouseActive ) {
 				
-				if ( this.selectStart ) {
+				if ( this.ref ) {
 					
-					this.selection.start = df.min(range.start, this.selectStart.start);
-					this.selection.end = df.max(range.end, this.selectStart.end);
+					this.selection.start = df.min(range.start, this.ref.start);
+					this.selection.end = df.max(range.end, this.ref.end);
 					return;
 				}
-				
-				if ( keyActive ) {
-
-					if ( Math.abs(df.differenceInMilliseconds(range.start, this.selection.start)) < Math.abs(df.differenceInMilliseconds(range.end, this.selection.end)) )
-						this.selection.start = range.start;
-					else
-						this.selection.end = range.end;
-					return;
-					
-				}
-
 			}
 			
 			this.$emit('action', type, mouseActive, keyActive, range, rangeType);
-
+		},
+		actionLeft: function(type, mouseActive, keyActive, range, rangeType) {
+			this.action('left', type, mouseActive, keyActive, range, rangeType);
+		},
+		actionRight: function(type, mouseActive, keyActive, range, rangeType) {
+			this.action('right', type, mouseActive, keyActive, range, rangeType);
 		}
 	}
 }
