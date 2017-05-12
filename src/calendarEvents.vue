@@ -11,7 +11,7 @@
 				<div
 					class="eventAt"
 					v-for="event in events"
-					v-if="df.isEqual(event.start, event.end) && dateIsSame(p.arg, event.start, p.type)"
+					v-if="(!event.end || df.isEqual(event.start, event.end)) && df.isWithinRange(event.start, p.itemRange.start, p.itemRange.end)"
 					:style="{ backgroundColor: event.color }"
 				></div>
 			</div>
@@ -41,6 +41,7 @@
 .calendar .timeHorizontal .events {
 	width: 100%;
 	vertical-align: top;
+	text-align: center;
 }
 
 .calendar .timeHorizontal .eventRange {
@@ -48,11 +49,12 @@
 	display: block;
 	margin: 2px 0;
 	width: 100%;
-	min-width: 10px;
+	min-width: 1px;
 	height: 2px;
 }
 
 .calendar .timeHorizontal .eventAt {
+	vertical-align: top;
 }
 
 
@@ -65,7 +67,7 @@
 	margin: 0 2px;
 	width: 2px;
 	height: 100%;
-	min-height: 10px;
+	min-height: 1px;
 	vertical-align: top;
 }
 
@@ -155,6 +157,7 @@ module.exports = {
 	},
 	created: function() {
 
+/*
 		this.dateIsSame = function(d1, d2, type) {
 			
 			switch (type) {
@@ -165,6 +168,7 @@ module.exports = {
 				case 'year': return df.isSameYear(d1, d2);
 			}
 		}
+*/
 /*
 		this.isWithinRangeExcludeEnd = function(dirtyDate, dirtyStartDate, dirtyEndDate) {
 			
