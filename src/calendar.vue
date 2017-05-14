@@ -1,5 +1,5 @@
 <template>
-	<div class="calendar" :class="{ compact: compact }" @click="mouse" @dblclick="mouse" @mousedown="mouse" @mouseup="mouse" @mouseover="mouse" @mouseout="mouse">
+	<div class="calendar" :class="{ compact: compact }" v-onpointer="pointerEvent">
 		<div class="nav">
 			<span class="prev" @click="move(-1)" @mouseenter="$event.buttons !== 0 && moveEnter(-1)" @mouseleave="moveLeave()"></span>
 
@@ -73,7 +73,7 @@
 					<span v-if="!compact"></span>
 					<span v-for="n in 7" v-text="format(df.setDay(current, firstDayOfTheWeek+n-1), compact ? 'dd' : 'ddd')"></span>
 				</div>
-				<div v-for="y in compact ? visibleWeeks : 6">
+				<div v-for="y in compact ? visibleWeeksCount : 6">
 					<template v-for="week in [df.addDays(firstDayOfMonthView, (y-1) * 7)]">
 						<span
 							v-if="!compact"
@@ -315,7 +315,8 @@
 /* highlighting */
 
 .calendar span[data-item]:hover {
-	background-color: #eee;
+	/*background-color: #eee;*/
+	outline: 1px dotted #000;
 }
 
 .calendar .this {
@@ -436,25 +437,6 @@
 
 var df = require('date-fns'); // https://date-fns.org
 
-function firstDayOfTheWeek(locale) {
-	
-	if (' GB AG AR AS AU BR BS BT BW BZ CA CN CO DM DO ET GT GU HK HN ID IE IL IN JM JP KE KH KR LA MH MM MO MT MX MZ NI NP NZ PA PE PH PK PR PY SA SG SV TH TN TT TW UM US VE VI WS YE ZA ZW '.indexOf(' '+locale+' ') !== -1 )
-		return 0; // sun
-	if (' AE AF BH DJ DZ EG IQ IR JO KW LY MA OM QA SD SY '.indexOf(' '+locale+' ') !== -1 )
-		return 6; // sat
-	if (' BD MV '.indexOf(' '+locale+' ') !== -1 )
-		return 5; // fri
-	return 1; // mon
-}
-
-var localeCache = {};
-function getLocale(localeId) {
-	
-	if ( !(localeId in localeCache) )
-		localeCache[localeId] = require('date-fns/locale/'+localeId.toLowerCase()+'/index.js');
-	return localeCache[localeId];
-}
-
 
 function findDataAttr(elt, dataAttrName) {
 	
@@ -498,6 +480,118 @@ var VIEW = {
 }
 
 
+function onpointer() {
+	
+	function hasKeyActive(ev) {
+		
+		return ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey;
+	}
+
+	function hasPointerActive(ev) {
+		
+		return ev.buttons !== 0;
+	}
+
+
+
+	function touchStartHandler(binding, ev) {
+
+		binding.value('down', ev.target, true, false);
+		
+		binding._pressTimeout = setTimeout(function() {
+		
+			binding.value('press', ev.target, true, false);
+		}, 1000);
+	}
+	
+	function touchEndHandler(binding, ev) {
+
+		if ( binding._pressTimeout ) {
+			
+			clearTimeout(binding._pressTimeout);
+			binding._pressTimeout = undefined;
+		}
+
+		binding.value('up', ev.target, false, false);
+	}
+
+	function touchMoveHandler(binding, ev) {
+		
+		if ( binding._pressTimeout ) {
+			
+			clearTimeout(binding._pressTimeout);
+			binding._pressTimeout = undefined;
+		}
+		
+		ev.preventDefault();
+		var eventTarget = document.elementFromPoint(ev.changedTouches[0].clientX, ev.changedTouches[0].clientY);
+		binding.value('over', eventTarget, true, false);
+	}
+	
+	function clickHandler(binding, ev) {
+		
+		binding.value('tap', ev.target, false, hasKeyActive(ev));
+	}
+	
+	function dblclickHandler(binding, ev) {
+		
+		binding.value('press', ev.target, false, hasKeyActive(ev));
+	}
+	
+	function mouseMoveHandler(binding, ev) {
+
+		binding.value('over', ev.target, hasPointerActive(ev), hasKeyActive(ev));
+	}
+	
+	function mouseDownHandler(binding, ev) {
+
+		binding.value('down', ev.target, true, hasKeyActive(ev));
+	}
+	
+	function mouseupHandler(binding, ev) {
+
+		binding.value('up', ev.target, false, hasKeyActive(ev));
+	}
+	
+	
+	function eventListener(el, eventName, handler) {
+		
+		el.addEventListener(eventName, handler);
+		return el.removeEventListener.bind(el, eventName, handler);
+	}
+
+	return {
+		bind: function(el, binding, vnode, oldVnode) {
+			
+			var offTouchstart = eventListener(el, 'touchstart', touchStartHandler.bind(this, binding));
+			var offTouchmove = eventListener(el, 'touchmove', touchMoveHandler.bind(this, binding));
+			var offTouchend = eventListener(el, 'touchend', touchEndHandler.bind(this, binding));
+			var offClick = eventListener(el, 'click', clickHandler.bind(this, binding));
+			var offDblclick = eventListener(el, 'dblclick', dblclickHandler.bind(this, binding));
+			var offMousemove = eventListener(el, 'mousemove', mouseMoveHandler.bind(this, binding));
+			var offMousedown = eventListener(el, 'mousedown', mouseDownHandler.bind(this, binding));
+			var offMouseup = eventListener(el, 'mouseup', mouseupHandler.bind(this, binding));
+			
+			binding.removeListeners = function() {
+				
+				offTouchstart();
+				offTouchmove();
+				offTouchend();
+				offClick();
+				offDblclick();
+				offMousemove();
+				offMousedown();
+				offMouseup();
+			}
+		},
+		unbind: function(el, binding, vnode, oldVnode) {
+			
+			binding.removeListeners();
+		},
+	}
+}
+
+
 module.exports = {
 	
 	directives: {
@@ -506,13 +600,18 @@ module.exports = {
 			if ( isEq(binding.value, binding.oldValue) )
 				return;
 			el.dataset[binding.arg] = binding.modifiers.json === true ? JSON.stringify(binding.value) : String(binding.value);
-		}
+		},
+		onpointer: onpointer(),
 	},
 
 	props: {
 		locale: {
 			type: String,
-			default: navigator.language.toUpperCase(), 	
+			default: navigator.language.toUpperCase(),
+			validator: function(value) {
+				
+				return value === value.toUpperCase();
+			}
 		},
 		compact: {
 			type: Boolean,
@@ -564,11 +663,17 @@ module.exports = {
 		},
 		
 		firstDayOfTheWeek: function() {
-			
-			return firstDayOfTheWeek(this.locale);
+					
+			if (' GB AG AR AS AU BR BS BT BW BZ CA CN CO DM DO ET GT GU HK HN ID IE IL IN JM JP KE KH KR LA MH MM MO MT MX MZ NI NP NZ PA PE PH PK PR PY SA SG SV TH TN TT TW UM US VE VI WS YE ZA ZW '.indexOf(' '+this.locale+' ') !== -1 )
+				return 0; // sun
+			if (' AE AF BH DJ DZ EG IQ IR JO KW LY MA OM QA SD SY '.indexOf(' '+this.locale+' ') !== -1 )
+				return 6; // sat
+			if (' BD MV '.indexOf(' '+this.locale+' ') !== -1 )
+				return 5; // fri
+			return 1; // mon
 		},
 		
-		visibleWeeks: function() {
+		visibleWeeksCount: function() {
 
 			return Math.ceil((df.getDaysInMonth(this.current) + df.getDay(df.startOfMonth(this.current)) ) / 7);
 		},
@@ -576,13 +681,18 @@ module.exports = {
 		firstDayOfMonthView: function() {
 			
 			return df.setDay(df.startOfMonth(this.current), this.firstDayOfTheWeek);
+		},
+		
+		dateFnsLocale: function() {
+			
+			return require('date-fns/locale/'+this.locale.toLowerCase()+'/index.js');
 		}
 	},
 	
 	methods: {
 		format: function(date, format) {
 
-			return df.format(date, format, { locale: getLocale(this.locale) });
+			return df.format(date, format, { locale: this.dateFnsLocale });
 		},
 		
 		getItemRange: function(date, type) {
@@ -646,19 +756,17 @@ module.exports = {
 			clearTimeout(this.moveInterval);
 		},
 		
-		mouse: function(ev) {
-			
-			var value = findDataAttr(ev.target, 'item');
+		pointerEvent: function(eventType, eventTarget, eventActive, keyActive) {
+
+			var value = findDataAttr(eventTarget, 'item');
 			if ( value === undefined )
 				return;
 			
 			var date = df.parse(value[0]*10000); // 10000: currently, min resolution is "minute"
 			var type = value[1];
-
-			var keyActive = ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey;
-			var mouseActive = ev.buttons !== 0;
-
-			if ( !keyActive && ev.type === 'click' ) {
+			
+			
+			if ( !keyActive && eventType === 'tap' ) {
 				
 				switch ( type ) {
 					case 'month':
@@ -672,7 +780,7 @@ module.exports = {
 				}
 			}
 			
-			if ( !keyActive && ev.type === 'dblclick' ) {
+			if ( !keyActive && eventType === 'press' ) {
 				
 				switch ( type ) {
 					case 'hour':
@@ -693,7 +801,8 @@ module.exports = {
 			
 			var range = this.getItemRange(date, type);
 			
-			this.$emit('action', ev.type, mouseActive, keyActive, range, type);
+			this.$emit('action', eventType, eventActive, keyActive, range, type);
+			
 		},
 	},
 	created: function() {

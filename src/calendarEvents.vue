@@ -1,5 +1,5 @@
 <template>
-	<calendar :events="events" :selection="selection" :item-class="itemClass" @action="action">
+	<calendar :events="events" :selection="selection" :item-class="thisItemClass" @action="action">
 		<template scope="p">
 			<div class="events">
 				<div
@@ -113,6 +113,10 @@ module.exports = {
 				return {}
 			}
 		},
+		itemClass: {
+			type: Function,
+			default: function() {},
+		},
 		events: {
 			type: Array,
 			default: []
@@ -120,17 +124,22 @@ module.exports = {
 	},
 	methods: {
 
-		itemClass: function(range) {
+		thisItemClass: function(range) {
 			
 			var start = this.selection.start;
 			var end = this.selection.end;
 			var start = df.min(start, end);
 			var end = df.max(start, end);
-
+			
+			var classlist = [this.itemClass(range)];
+			
 			if ( !(df.isAfter(start, range.start) || df.isBefore(end, range.end)) )
-				return 'selection'+2;
+				classlist.push('selection'+2);
+			else
 			if ( df.areRangesOverlapping(start, end, range.start, range.end) )
-				return 'selection'+1;
+				classlist.push('selection'+1);
+			
+			return classlist;
 		},
 		
 		eventStyle: function(event, itemRange, layout) {

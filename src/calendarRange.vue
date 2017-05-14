@@ -1,7 +1,7 @@
 <template>
 	<div style="user-select: none">
-		<calendar-events :compact="compact" :events="events" :selection="selection" @action="actionLeft"></calendar-events><!--
-	 --><calendar-events :compact="compact" :events="events" :selection="selection" @action="actionRight"></calendar-events>
+		<calendar-events :compact="compact" :item-class="itemClass" :events="events" :selection="selection" @action="actionLeft"></calendar-events><!--
+	 --><calendar-events :compact="compact" :item-class="itemClass" :events="events" :selection="selection" @action="actionRight"></calendar-events>
 	</div>
 </template>
 
@@ -21,6 +21,10 @@ module.exports = {
 		},
 		events: {
 		},
+		itemClass: {
+			type: Function,
+			default: function() {},
+		},
 		selection: {
 			type: Object,
 			required: true,
@@ -32,9 +36,9 @@ module.exports = {
 		}
 	},
 	methods: {
-		action: function(side, type, mouseActive, keyActive, range, rangeType) {
+		action: function(side, eventType, eventActive, keyActive, range, rangeType) {
 
-			if ( type === 'mousedown' ) {
+			if ( eventType === 'down' ) {
 				
 				if ( keyActive ) {
 					
@@ -57,10 +61,10 @@ module.exports = {
 				this.ref = range;
 			}
 
-			if ( type === 'mouseup' )
+			if ( eventType === 'up' )
 				this.ref = null;
 
-			if ( type === 'mouseover' && mouseActive ) {
+			if ( eventType === 'over' && eventActive ) {
 				
 				if ( this.ref ) {
 					
@@ -70,13 +74,13 @@ module.exports = {
 				}
 			}
 			
-			this.$emit('action', type, mouseActive, keyActive, range, rangeType);
+			this.$emit('action', eventType, eventActive, keyActive, range, rangeType);
 		},
-		actionLeft: function(type, mouseActive, keyActive, range, rangeType) {
-			this.action('left', type, mouseActive, keyActive, range, rangeType);
+		actionLeft: function(eventType, eventActive, keyActive, range, rangeType) {
+			this.action('left', eventType, eventActive, keyActive, range, rangeType);
 		},
-		actionRight: function(type, mouseActive, keyActive, range, rangeType) {
-			this.action('right', type, mouseActive, keyActive, range, rangeType);
+		actionRight: function(eventType, eventActive, keyActive, range, rangeType) {
+			this.action('right', eventType, eventActive, keyActive, range, rangeType);
 		}
 	}
 }
