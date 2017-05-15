@@ -202,6 +202,10 @@ export default {
 
 ```
 
+## Demo
+
+![vue-calendar-picker demo](https://cloud.githubusercontent.com/assets/25509586/26059550/7863fa02-3982-11e7-8a20-83f77dbfe4de.gif)
+
 
 
 ## Credits
