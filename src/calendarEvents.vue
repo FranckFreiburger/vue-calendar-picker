@@ -2,8 +2,8 @@
 	<calendar
 		:locale="locale"
 		:compact="compact"
-		:initialView="initialView"
-		:initialCurrent="initialCurrent"
+		:initial-view="initialView"
+		:initial-current="initialCurrent"
 		:item-class="thisItemClass"
 		
 		:events="events"
