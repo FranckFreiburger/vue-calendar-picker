@@ -1,5 +1,5 @@
 {
-  "name": "@franck.freiburger/vue-calendar-picker",
+  "name": "vue-calendar-picker",
   "version": "1.0.0",
   "description": "calendar component",
   "main": "src/index.js",
