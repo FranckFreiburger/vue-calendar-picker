@@ -39,7 +39,7 @@ npm install --save vue-calendar-picker
 * display one-time events and date/time period
 * date/time period selection
 * touch screen support
-* only one dependancy: [date-fns](https://date-fns.org/), Modern JavaScript date utility library
+* only one dependancy: [date-fns](https://date-fns.org/), a Modern JavaScript date utility library
 
 `vue-calendar-picker` has 3 available components:
 * `calendar.vue`: simple calendar
@@ -76,7 +76,7 @@ Called for each calendar cell. The retun valus is used as className of the cell.
 
 ### UI
 * event range are colored lines
-* event point are dots
+* event point are big dots
 
 #### @action <sup>(eventType, eventActive, keyActive, range, rangeType)</sup>
 
@@ -99,6 +99,18 @@ The date range of the item
 ##### `rangeType` <sup>string</sup>
 The range name: `'minute'`, `'hour'`, `'day'`, `'week'`, `'month'`, `'year'`, 
 
+### Styling
+vue-calendar-picker can by styled easily, the name space is `.calendar`.
+
+###### example
+
+```css
+.calendar {
+    border: 2px solid #000;
+    border-radius: 0.5em;
+    padding: 0.5em;
+}
+```
 
 
 ### Slots
