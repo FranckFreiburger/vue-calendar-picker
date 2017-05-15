@@ -14,15 +14,17 @@
 			<div class="events">
 				<div
 					class="eventRange"
-					v-for="event in events"
+					v-for="(event, index) in events"
 					v-if="!df.isEqual(event.start, event.end) && df.areRangesOverlapping(event.start, event.end, p.itemRange.start, p.itemRange.end)"
 					:style="[ { backgroundColor: event.color }, eventStyle(event, p.itemRange, p.layout) ]"
+					:data-event="index"
 				></div>
 				<div
 					class="eventAt"
-					v-for="event in events"
+					v-for="(event, index) in events"
 					v-if="df.isEqual(event.start, event.end) && df.isWithinRange(event.start, p.itemRange.start, p.itemRange.end) && !df.isEqual(event.end, p.itemRange.end)"
 					:style="{ backgroundColor: event.color }"
+					:data-event="index"
 				></div>
 			</div>
 		</template>
@@ -177,31 +179,15 @@ module.exports = {
 				return { top: uiOffset, height: uiSize };
 		},
 	
-		action: function(type, mouseActive, keyActive, range, rangeType) {
+		action: function(ev) {
 			
-			this.$emit('action', type, mouseActive, keyActive, range, rangeType);
+			if ( 'event' in ev.dataAttr )
+				ev.calendarEvent = this.events[ev.dataAttr.event];
+			this.$emit('action', ev);
 		}	
 	},
 	created: function() {
 
-/*
-		this.dateIsSame = function(d1, d2, type) {
-			
-			switch (type) {
-				case 'hour': return df.isSameHour(d1, d2);
-				case 'day': return df.isSameDay(d1, d2);
-				case 'week': return df.isSameWeek(d1, d2);
-				case 'month': return df.isSameMonth(d1, d2);
-				case 'year': return df.isSameYear(d1, d2);
-			}
-		}
-*/
-/*
-		this.isWithinRangeExcludeEnd = function(dirtyDate, dirtyStartDate, dirtyEndDate) {
-			
-			return df.isWithinRange(dirtyDate, dirtyStartDate, dirtyEndDate) && !df.isEqual(dirtyDate, dirtyEndDate);
-		}
-*/
 		this.df = df;
 	}
 }

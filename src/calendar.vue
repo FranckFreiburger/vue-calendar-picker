@@ -439,12 +439,14 @@
 var df = require('date-fns'); // https://date-fns.org
 
 
-function findDataAttr(elt, dataAttrName) {
+function findDataAttr(elt, rootElt) {
 	
-	for ( ; elt !== null; elt = elt.parentNode )
-		if ( elt.nodeType === 1 && dataAttrName in elt.dataset )
-			return JSON.parse(elt.dataset[dataAttrName]);
-	return undefined;
+	var dataAttrMap = {};
+	for ( ; elt !== rootElt && elt !== null; elt = elt.parentNode )
+		if ( elt.nodeType === 1 )
+			for ( var propName in elt.dataset )
+				dataAttrMap[propName] = elt.dataset[propName];
+	return dataAttrMap;
 }
 
 function isEq(val1, val2) {
@@ -495,63 +497,63 @@ function onpointer() {
 
 
 
-	function touchStartHandler(binding, ev) {
+	function touchStartHandler(cx, ev) {
 
-		binding.value('down', ev.target, true, false);
+		cx.callback({ eventType:'down', eventTarget:ev.target, pointerActive:true, keyActive:false});
 		
-		binding._pressTimeout = setTimeout(function() {
+		cx._pressTimeout = setTimeout(function() {
 		
-			binding.value('press', ev.target, true, false);
+			cx.callback({ eventType:'press', eventTarget:ev.target, pointerActive:true, keyActive:false});
 		}, 1000);
 	}
 	
-	function touchEndHandler(binding, ev) {
+	function touchEndHandler(cx, ev) {
 
-		if ( binding._pressTimeout ) {
+		if ( cx._pressTimeout ) {
 			
-			clearTimeout(binding._pressTimeout);
-			binding._pressTimeout = undefined;
+			clearTimeout(cx._pressTimeout);
+			cx._pressTimeout = undefined;
 		}
 
-		binding.value('up', ev.target, false, false);
+		cx.callback({ eventType:'up', eventTarget:ev.target, pointerActive:false, keyActive:false});
 	}
 
-	function touchMoveHandler(binding, ev) {
+	function touchMoveHandler(cx, ev) {
 		
-		if ( binding._pressTimeout ) {
+		if ( cx._pressTimeout ) {
 			
-			clearTimeout(binding._pressTimeout);
-			binding._pressTimeout = undefined;
+			clearTimeout(cx._pressTimeout);
+			cx._pressTimeout = undefined;
 		}
 		
 		ev.preventDefault();
 		var eventTarget = document.elementFromPoint(ev.changedTouches[0].clientX, ev.changedTouches[0].clientY);
-		binding.value('over', eventTarget, true, false);
+		cx.callback({ eventType:'over', eventTarget:eventTarget, pointerActive:true, keyActive:false});
 	}
 	
-	function clickHandler(binding, ev) {
+	function clickHandler(cx, ev) {
 		
-		binding.value('tap', ev.target, false, hasKeyActive(ev));
+		cx.callback({ eventType:'tap', eventTarget:ev.target, pointerActive:false, keyActive:hasKeyActive(ev)});
 	}
 	
-	function dblclickHandler(binding, ev) {
+	function dblclickHandler(cx, ev) {
 		
-		binding.value('press', ev.target, false, hasKeyActive(ev));
+		cx.callback({ eventType:'press', eventTarget:ev.target, pointerActive:false, keyActive:hasKeyActive(ev)});
 	}
 	
-	function mouseMoveHandler(binding, ev) {
+	function mouseMoveHandler(cx, ev) {
 
-		binding.value('over', ev.target, hasPointerActive(ev), hasKeyActive(ev));
+		cx.callback({ eventType:'over', eventTarget:ev.target, pointerActive:hasPointerActive(ev), keyActive:hasKeyActive(ev)});
 	}
 	
-	function mouseDownHandler(binding, ev) {
+	function mouseDownHandler(cx, ev) {
 
-		binding.value('down', ev.target, true, hasKeyActive(ev));
+		cx.callback({ eventType:'down', eventTarget:ev.target, pointerActive:true, keyActive:hasKeyActive(ev)});
 	}
 	
-	function mouseupHandler(binding, ev) {
+	function mouseupHandler(cx, ev) {
 
-		binding.value('up', ev.target, false, hasKeyActive(ev));
+		cx.callback({ eventType:'up', eventTarget:ev.target, pointerActive:false, keyActive:hasKeyActive(ev)});
 	}
 	
 	
@@ -564,16 +566,21 @@ function onpointer() {
 	return {
 		bind: function(el, binding, vnode, oldVnode) {
 			
-			var offTouchstart = eventListener(el, 'touchstart', touchStartHandler.bind(this, binding));
-			var offTouchmove = eventListener(el, 'touchmove', touchMoveHandler.bind(this, binding));
-			var offTouchend = eventListener(el, 'touchend', touchEndHandler.bind(this, binding));
-			var offClick = eventListener(el, 'click', clickHandler.bind(this, binding));
-			var offDblclick = eventListener(el, 'dblclick', dblclickHandler.bind(this, binding));
-			var offMousemove = eventListener(el, 'mousemove', mouseMoveHandler.bind(this, binding));
-			var offMousedown = eventListener(el, 'mousedown', mouseDownHandler.bind(this, binding));
-			var offMouseup = eventListener(el, 'mouseup', mouseupHandler.bind(this, binding));
+			var cx = {
+				el: el,
+				callback: binding.value
+			}
 			
-			el._onpointer_removeListeners = function() {
+			var offTouchstart = eventListener(el, 'touchstart', touchStartHandler.bind(this, cx));
+			var offTouchmove = eventListener(el, 'touchmove', touchMoveHandler.bind(this, cx));
+			var offTouchend = eventListener(el, 'touchend', touchEndHandler.bind(this, cx));
+			var offClick = eventListener(el, 'click', clickHandler.bind(this, cx));
+			var offDblclick = eventListener(el, 'dblclick', dblclickHandler.bind(this, cx));
+			var offMousemove = eventListener(el, 'mousemove', mouseMoveHandler.bind(this, cx));
+			var offMousedown = eventListener(el, 'mousedown', mouseDownHandler.bind(this, cx));
+			var offMouseup = eventListener(el, 'mouseup', mouseupHandler.bind(this, cx));
+			
+			cx.removeListeners = function() {
 				
 				offTouchstart();
 				offTouchmove();
@@ -584,11 +591,14 @@ function onpointer() {
 				offMousedown();
 				offMouseup();
 			}
+			
+			el._onpointerCx = cx;
 		},
 		unbind: function(el, binding, vnode, oldVnode) {
 			
-			el._onpointer_removeListeners();
-		},
+			el._onpointerCx.removeListeners();
+			el._onpointerCx = null;
+		}
 	}
 }
 
@@ -757,53 +767,52 @@ module.exports = {
 			clearTimeout(this.moveInterval);
 		},
 		
-		pointerEvent: function(eventType, eventTarget, eventActive, keyActive) {
+		pointerEvent: function(ev) {
 
-			var value = findDataAttr(eventTarget, 'item');
-			if ( value === undefined )
-				return;
+			ev.dataAttr = findDataAttr(ev.eventTarget, this.$el);
 			
-			var date = df.parse(value[0]*10000); // 10000: currently, min resolution is "minute"
-			var type = value[1];
-			
-			
-			if ( !keyActive && eventType === 'tap' ) {
+			if ( 'item' in ev.dataAttr ) {
 				
-				switch ( type ) {
-					case 'month':
-						this.view = VIEW.MONTH;
-						this.current = date;
-						return;
-					case 'year':
-						this.view = VIEW.YEAR;
-						this.current = date;
-						return;
-				}
-			}
-			
-			if ( !keyActive && eventType === 'press' ) {
+				var value = JSON.parse(ev.dataAttr.item);
+				var date = df.parse(value[0]*10000); // 10000: currently, min resolution is "minute"
+				ev.type = value[1];
 				
-				switch ( type ) {
-					case 'hour':
-						this.view = VIEW.HOUR;
-						this.current = date;
-						return;
-					case 'day':
-						this.view = VIEW.DAY;
-						this.current = date;
-						return;
-					case 'week':
-						this.view = VIEW.WEEK;
-						this.current = date;
-						return;
+				if ( !ev.keyActive && ev.eventType === 'tap' ) {
+					
+					switch ( ev.type ) {
+						case 'month':
+							this.view = VIEW.MONTH;
+							this.current = date;
+							return;
+						case 'year':
+							this.view = VIEW.YEAR;
+							this.current = date;
+							return;
+					}
 				}
 				
+				if ( !ev.keyActive && ev.eventType === 'press' ) {
+					
+					switch ( ev.type ) {
+						case 'hour':
+							this.view = VIEW.HOUR;
+							this.current = date;
+							return;
+						case 'day':
+							this.view = VIEW.DAY;
+							this.current = date;
+							return;
+						case 'week':
+							this.view = VIEW.WEEK;
+							this.current = date;
+							return;
+					}
+				}
+				
+				ev.range = this.getItemRange(date, ev.type);
 			}
 			
-			var range = this.getItemRange(date, type);
-			
-			this.$emit('action', eventType, eventActive, keyActive, range, type);
-			
+			this.$emit('action', ev);
 		},
 	},
 	created: function() {

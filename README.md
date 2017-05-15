@@ -49,7 +49,7 @@ npm install --save vue-calendar-picker
 
 ## API - `calendar.vue`
 
-### UI
+### UI details
 * click on date part in the calendar header area to modify it (zoom out)
 * click or double-click on the cell to zoom in. (from month view, use double-click to zoom in)
 
@@ -74,43 +74,29 @@ Called for each calendar cell. The retun valus is used as className of the cell.
 
 ### Events
 
-### UI
-* event range are colored lines
-* event point are big dots
+#### @action <sup>(eventObject)</sup>
 
-#### @action <sup>(eventType, eventActive, keyActive, range, rangeType)</sup>
+`eventObject` has the following properties:
 
-##### `eventType` <sup>string</sup>
+##### eventType <sup>string</sup>
 * `'down'`: mousedown or touchstart
 * `'up'`: mouseup or touchend
 * `'tap'`: click
 * `'press'`: dblclick or longtap
 * `'over'`: mouseover or touchmove
 
-##### `eventActive` <sup>boolean</sup>
+##### eventActive <sup>boolean</sup>
 Indicates that the pointer is active: a mouse button is down or the finger touches the screen.
 
-##### `keyActive` <sup>boolean</sup>
+##### keyActive <sup>boolean</sup>
 Indicates that the shift or ctrl or alt or meta key is down. Always `false` on touch-screen devices.
 
-##### `range` <sup>`{ start: Date, end: Date }`</sup>
+##### range <sup>`{ start: Date, end: Date }`</sup>
 The date range of the item
 
-##### `rangeType` <sup>string</sup>
-The range name: `'minute'`, `'hour'`, `'day'`, `'week'`, `'month'`, `'year'`, 
+##### rangeType <sup>string</sup>
+The range name: `'minute'`, `'hour'`, `'day'`, `'week'`, `'month'`, `'year'`.
 
-### Styling
-vue-calendar-picker can by styled easily, the name space is `.calendar`.
-
-###### example
-
-```css
-.calendar {
-    border: 2px solid #000;
-    border-radius: 0.5em;
-    padding: 0.5em;
-}
-```
 
 
 ### Slots
@@ -123,6 +109,19 @@ The time range of the the cell.
 
 ##### `layout` <sup>string</sup>
 The layout of the content, either `'horizontal'` or `'vertical'`.
+
+
+### Styling
+vue-calendar-picker can by styled easily, all css selectors are prefixed with `.calendar`.
+
+###### example
+```css
+.calendar {
+    border: 2px solid #000;
+    border-radius: 0.5em;
+    padding: 0.5em;
+}
+```
 
 
 ## API - `calendarEvents.vue`
@@ -146,17 +145,23 @@ The current calendar selection. For display only.
 
 #### @action - see [calendar.vue](#api---calendarvue) API.
 
+#### @action <sup>(eventObject)</sup>
+
+`eventObject` has the same properties that [calendar.vue](#api---calendarvue) added:
+
+##### calendarEvent <sup>`{ start: Date, end: Date }`</sup>
+A reference to the `calendarEvent` related to the mouse/touch event otherwise undefined.
+
+
+### UI details
+* event range are colored lines
+* event point are big dots
+
 
 
 ## API - `calendarRange.vue`
 
-Allow user selection.  
-The `selection` property object is modified according to the user's selection.  
-
-### UI
-* use mousedow + move or tap + move to select a range (also across calendars)
-* use ctrl + click to update the selection (disbled on touch screens)
-
+Allow user selection. The `selection` property object is modified according to the user's selection.
 
 ### Properties
 
@@ -175,8 +180,14 @@ Display two calendars side-by-side to make selection easier.
 
 ### Events
 
-#### @action - see [calendarEvents.vue](#api---calendareventsvue) API.
+#### @action <sup>(eventObject)</sup>
 
+`eventObject` has the same properties that [calendar.vue](#api---calendareventsvue).
+
+
+### UI details
+* use mousedown + move or tap + move to select a range (also across calendars)
+* use ctrl + click to update the selection from the nearest end point (disbled on touch screens)
 
 
 ## Example - advanced

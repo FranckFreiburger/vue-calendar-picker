@@ -49,45 +49,45 @@ module.exports = {
 		}
 	},
 	methods: {
-		action: function(eventType, eventActive, keyActive, range, rangeType) {
+		action: function(ev) {
 
-			if ( eventType === 'down' ) {
+			if ( ev.eventType === 'down' ) {
 				
-				if ( keyActive ) {
+				if ( ev.keyActive ) {
 					
-					var rangeLength = df.differenceInMilliseconds(range.end, range.start);
-					var midRange = df.addMilliseconds(range.start, rangeLength/2);
+					var rangeLength = df.differenceInMilliseconds(ev.range.end, ev.range.start);
+					var midRange = df.addMilliseconds(ev.range.start, rangeLength/2);
 					var midSel = df.addMilliseconds(this.selection.start, df.differenceInMilliseconds(this.selection.end, this.selection.start)/2);
 
 					if ( df.isBefore(midRange, midSel) ) {
 
 						this.ref = { start: df.subMilliseconds(this.selection.end, rangeLength), end: this.selection.end }
-						this.selection.start = df.min(range.start, this.ref.start);
+						this.selection.start = df.min(ev.range.start, this.ref.start);
 					} else {
 
 						this.ref = { start: this.selection.start, end: df.addMilliseconds(this.selection.start, rangeLength) }
-						this.selection.end = df.max(range.end, this.ref.end);
+						this.selection.end = df.max(ev.range.end, this.ref.end);
 					}
 					return;
 				}
 
-				this.ref = range;
+				this.ref = ev.range;
 			}
 
-			if ( eventType === 'up' )
+			if ( ev.eventType === 'up' )
 				this.ref = null;
 
-			if ( eventType === 'over' && eventActive ) {
+			if ( ev.eventType === 'over' && ev.pointerActive ) {
 				
 				if ( this.ref ) {
 					
-					this.selection.start = df.min(range.start, this.ref.start);
-					this.selection.end = df.max(range.end, this.ref.end);
+					this.selection.start = df.min(ev.range.start, this.ref.start);
+					this.selection.end = df.max(ev.range.end, this.ref.end);
 					return;
 				}
 			}
-			
-			this.$emit('action', eventType, eventActive, keyActive, range, rangeType);
+
+			this.$emit('action', ev);
 		}
 	}
 }
