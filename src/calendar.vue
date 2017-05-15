@@ -568,39 +568,26 @@ function onpointer() {
 			
 			var cx = {
 				el: el,
-				callback: binding.value
+				callback: binding.value,
+				offEvent: []
 			}
 			
-			var offTouchstart = eventListener(el, 'touchstart', touchStartHandler.bind(this, cx));
-			var offTouchmove = eventListener(el, 'touchmove', touchMoveHandler.bind(this, cx));
-			var offTouchend = eventListener(el, 'touchend', touchEndHandler.bind(this, cx));
-			var offClick = eventListener(el, 'click', clickHandler.bind(this, cx));
-			var offDblclick = eventListener(el, 'dblclick', dblclickHandler.bind(this, cx));
-			var offMouseover = eventListener(el, 'mouseover', mouseOverHandler.bind(this, cx));
-			var offMousedown = eventListener(el, 'mousedown', mouseDownHandler.bind(this, cx));
-			var offMouseup = eventListener(el, 'mouseup', mouseUpHandler.bind(this, cx));
-			
-			var offDragStart = eventListener(el, 'selectstart', function(ev) { ev.preventDefault() } ); // for IE9
-			
-			cx.removeListeners = function() {
-				
-				offTouchstart();
-				offTouchmove();
-				offTouchend();
-				offClick();
-				offDblclick();
-				offMouseover();
-				offMousedown();
-				offMouseup();
-				
-				offDragStart();
-			}
-			
+			cx.offEvent.push( eventListener(el, 'touchstart', touchStartHandler.bind(this, cx)) );
+			cx.offEvent.push( eventListener(el, 'touchmove', touchMoveHandler.bind(this, cx)) );
+			cx.offEvent.push( eventListener(el, 'touchend', touchEndHandler.bind(this, cx)) );
+			cx.offEvent.push( eventListener(el, 'click', clickHandler.bind(this, cx)) );
+			cx.offEvent.push( eventListener(el, 'dblclick', dblclickHandler.bind(this, cx)) );
+			cx.offEvent.push( eventListener(el, 'mouseover', mouseOverHandler.bind(this, cx)) );
+			cx.offEvent.push( eventListener(el, 'mousedown', mouseDownHandler.bind(this, cx)) );
+			cx.offEvent.push( eventListener(el, 'mouseup', mouseUpHandler.bind(this, cx)) );
+			cx.offEvent.push( eventListener(el, 'selectstart', function(ev) { ev.preventDefault() } ) ); // for IE9
+
 			el._onpointerCx = cx;
 		},
 		unbind: function(el, binding, vnode, oldVnode) {
 			
-			el._onpointerCx.removeListeners();
+			while ( cx.offEvent.length !== 0 )
+				cx.offEvent.pop()();
 			el._onpointerCx = null;
 		}
 	}
