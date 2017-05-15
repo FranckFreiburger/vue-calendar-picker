@@ -551,7 +551,7 @@ function onpointer() {
 		cx.callback({ eventType:'down', eventTarget:ev.target, pointerActive:true, keyActive:hasKeyActive(ev)});
 	}
 	
-	function mouseupHandler(cx, ev) {
+	function mouseUpHandler(cx, ev) {
 
 		cx.callback({ eventType:'up', eventTarget:ev.target, pointerActive:false, keyActive:hasKeyActive(ev)});
 	}
@@ -578,7 +578,7 @@ function onpointer() {
 			var offDblclick = eventListener(el, 'dblclick', dblclickHandler.bind(this, cx));
 			var offMousemove = eventListener(el, 'mousemove', mouseMoveHandler.bind(this, cx));
 			var offMousedown = eventListener(el, 'mousedown', mouseDownHandler.bind(this, cx));
-			var offMouseup = eventListener(el, 'mouseup', mouseupHandler.bind(this, cx));
+			var offMouseup = eventListener(el, 'mouseup', mouseUpHandler.bind(this, cx));
 			
 			var offDragStart = eventListener(el, 'selectstart', function(ev) { ev.preventDefault() } ); // for IE9
 			
