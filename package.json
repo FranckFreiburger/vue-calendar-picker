@@ -1,6 +1,6 @@
 {
   "name": "vue-calendar-picker",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "calendar component",
   "main": "src/index.js",
   "scripts": {},
