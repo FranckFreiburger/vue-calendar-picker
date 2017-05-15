@@ -1,7 +1,16 @@
 <template>
 	<div style="user-select: none">
-		<calendar-events :compact="compact" :item-class="itemClass" :events="events" :selection="selection" @action="actionLeft"></calendar-events><!--
-	 --><calendar-events :compact="compact" :item-class="itemClass" :events="events" :selection="selection" @action="actionRight"></calendar-events>
+		<calendar-events
+			v-for="i in useTwoCalendars? 2 : 1"
+			:locale="locale"
+			:compact="compact"
+			:initialView="initialView"
+			:initialCurrent="initialCurrent"
+			:selection="selection"
+			:events="events"
+			:item-class="itemClass"
+			@action="action"
+		></calendar-events>
 	</div>
 </template>
 
@@ -17,10 +26,12 @@ module.exports = {
 		calendarEvents: calendarEvents,
 	},
 	props: {
-		compact: {
-		},
-		events: {
-		},
+		locale: {},
+		compact: {},
+		initialView: {},
+		initialCurrent: {},
+		events: {},
+		
 		itemClass: {
 			type: Function,
 			default: function() {},
@@ -28,6 +39,10 @@ module.exports = {
 		selection: {
 			type: Object,
 			required: true,
+		},
+		useTwoCalendars: {
+			type: Boolean,
+			default: false,
 		}
 	},
 	data: function() {
@@ -36,7 +51,7 @@ module.exports = {
 		}
 	},
 	methods: {
-		action: function(side, eventType, eventActive, keyActive, range, rangeType) {
+		action: function(eventType, eventActive, keyActive, range, rangeType) {
 
 			if ( eventType === 'down' ) {
 				
@@ -75,12 +90,6 @@ module.exports = {
 			}
 			
 			this.$emit('action', eventType, eventActive, keyActive, range, rangeType);
-		},
-		actionLeft: function(eventType, eventActive, keyActive, range, rangeType) {
-			this.action('left', eventType, eventActive, keyActive, range, rangeType);
-		},
-		actionRight: function(eventType, eventActive, keyActive, range, rangeType) {
-			this.action('right', eventType, eventActive, keyActive, range, rangeType);
 		}
 	}
 }

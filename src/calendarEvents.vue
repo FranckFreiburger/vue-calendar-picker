@@ -1,5 +1,15 @@
 <template>
-	<calendar :events="events" :selection="selection" :item-class="thisItemClass" @action="action">
+	<calendar
+		:locale="locale"
+		:compact="compact"
+		:initialView="initialView"
+		:initialCurrent="initialCurrent"
+		:item-class="thisItemClass"
+
+		:events="events"
+		:selection="selection"
+		@action="action"
+	>
 		<template scope="p">
 			<div class="events">
 				<div
@@ -105,8 +115,10 @@ module.exports = {
 		calendar: calendar,
 	},
 	props: {
-		compact: {
-		},
+		locale: {},
+		compact: {},
+		initialView: {},
+		initialCurrent: {},
 		selection: {
 			type: Object,
 			default: function() {
@@ -126,12 +138,13 @@ module.exports = {
 
 		thisItemClass: function(range) {
 			
+			var classlist = [this.itemClass(range)];
+
 			var start = this.selection.start;
 			var end = this.selection.end;
 			var start = df.min(start, end);
 			var end = df.max(start, end);
 			
-			var classlist = [this.itemClass(range)];
 			
 			if ( !(df.isAfter(start, range.start) || df.isBefore(end, range.end)) )
 				classlist.push('selection'+2);
