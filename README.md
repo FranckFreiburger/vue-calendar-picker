@@ -1,10 +1,7 @@
 # vue-calendar-picker
 Calendar component
-
 ![vue-calendar-picker screenshot](https://cloud.githubusercontent.com/assets/25509586/26058700/40d539be-397f-11e7-86ad-d0af0f21e64d.png)
 
-## Browser support
-Same browser support as [Vue.js 2](https://github.com/vuejs/vue/blob/dev/README.md)
 
 ## Example - basic
 ```vue
@@ -23,13 +20,14 @@ export default {
 }
 
 </script>
-
 ```
+
 
 ## Install
 ```
 npm install --save vue-calendar-picker
 ```
+
 
 ## Features
 * zoom from decade view to hour view (decade, year, month, week, day, hour)
@@ -42,9 +40,9 @@ npm install --save vue-calendar-picker
 * only one dependancy: [date-fns](https://date-fns.org/), a Modern JavaScript date utility library
 
 `vue-calendar-picker` has 3 available components:
-* `calendar.vue`: simple calendar
-* `calendarEvents.vue`: `calendar.vue` + one-time events and date/time periods
-* `calendarRange.vue`: `calendarEvents.vue` + range selection
+* `calendar.vue`: simple calendar.
+* `calendarEvents.vue`: `calendar.vue` + one-time events and date/time periods display.
+* `calendarRange.vue`: `calendarEvents.vue` + range selection.
 
 
 ## API - `calendar.vue`
@@ -78,7 +76,7 @@ Called for each calendar cell. The retun valus is used as className of the cell.
 ##### eventType <sup>string</sup>
 * `'down'`: mousedown or touchstart
 * `'up'`: mouseup or touchend
-* `'tap'`: click
+* `'tap'`: click or tap
 * `'press'`: dblclick or longtap
 * `'over'`: mouseover or touchmove
 
@@ -93,7 +91,6 @@ The date range of the item
 
 ##### rangeType <sup>string</sup>
 The range name: `'minute'`, `'hour'`, `'day'`, `'week'`, `'month'`, `'year'`.
-
 
 
 ### Slots
@@ -192,6 +189,10 @@ Display two calendars side-by-side to make selection easier.
 * use ctrl + click to update the selection from the nearest end point (disbled on touch screens)
 
 
+## Browser support
+Same browser support as [Vue.js 2](https://github.com/vuejs/vue/blob/dev/README.md)
+
+
 ## Example - advanced
 ```vue
 <template>
@@ -224,13 +225,11 @@ export default {
     }
 }
 </script>
-
 ```
 
+
 ## Demo
-
 ![vue-calendar-picker demo](https://cloud.githubusercontent.com/assets/25509586/26059550/7863fa02-3982-11e7-8a20-83f77dbfe4de.gif)
-
 
 
 ## Credits
