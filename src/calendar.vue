@@ -1,7 +1,7 @@
 <template>
 	<div class="calendar" :class="{ compact: compact }" v-onpointer="pointerEvent">
 		<div class="nav">
-			<span class="prev" @click="move(-1)" @mouseenter="$event.buttons !== 0 && moveEnter(-1)" @mouseleave="moveLeave()"></span>
+			<span class="prev" data-nav="-1"></span>
 
 			<span v-if="view <= VIEW.YEAR" @click="view = VIEW.DECADE" v-text="df.getYear(current)"></span>
 			<span v-if="view <= VIEW.MONTH" @click="view = VIEW.YEAR" v-text="format(current, 'MMM')"></span>
@@ -9,7 +9,7 @@
 			<span v-if="view <= VIEW.DAY" @click="view = VIEW.MONTH" v-text="df.getDate(current)"></span>
 			<span v-if="view <= VIEW.HOUR" @click="view = VIEW.DAY">{{df.format(current, 'HH')}}<sup>h</sup></span>
 
-			<span class="next" @click="move(1)" @mouseenter="$event.buttons !== 0 && moveEnter(1)" @mouseleave="moveLeave()"></span>
+			<span class="next" data-nav="1"></span>
 		</div>
 		<transition-group :name="animation" @after-enter="animation = ''" class="animation">
 
@@ -509,7 +509,7 @@ function onpointer() {
 	
 	function touchEndHandler(cx, ev) {
 
-		if ( cx._pressTimeout ) {
+		if ( cx._pressTimeout !== undefined ) {
 			
 			clearTimeout(cx._pressTimeout);
 			cx._pressTimeout = undefined;
@@ -520,7 +520,7 @@ function onpointer() {
 
 	function touchMoveHandler(cx, ev) {
 		
-		if ( cx._pressTimeout ) {
+		if ( cx._pressTimeout !== undefined ) {
 			
 			clearTimeout(cx._pressTimeout);
 			cx._pressTimeout = undefined;
@@ -749,28 +749,48 @@ module.exports = {
 			}
 		},
 
-		moveEnter: function(dir) {
-			
-			var startMove = function(timeout) {
-
-				this.move(dir);
-				this.moveInterval = setTimeout(function() {
-					
-					startMove(Math.max(timeout * 0.9, 250));
-				}, timeout);
-			}.bind(this);
-			startMove(750);
-		},
-		
-		moveLeave: function() {
-			
-			clearTimeout(this.moveInterval);
-		},
-		
 		pointerEvent: function(ev) {
 
 			ev.dataAttr = findDataAttr(ev.eventTarget, this.$el);
 			
+			if ( ev.eventType === 'over' ) {
+				
+				if ( isEq(this.prevOverDataAttr, ev.dataAttr) )
+					return;
+				this.prevOverDataAttr = ev.dataAttr;
+			} else {
+				
+				this.prevOverDataAttr = undefined;
+			}
+
+
+			if ( 'nav' in ev.dataAttr ) {
+				
+				if ( ev.eventType === 'tap' )
+					this.move(ev.dataAttr.nav);
+				
+				if ( ev.eventType === 'over' && ev.pointerActive ) {
+
+					var startMove = function(timeout) {
+
+						this.move(ev.dataAttr.nav);
+						this.moveInterval = setTimeout(function() {
+							
+							startMove(Math.max(timeout * 0.8, 250));
+						}, timeout);
+					}.bind(this);
+					startMove(750);
+				}
+			} else {
+				
+				if ( this.moveInterval !== undefined ) {
+					
+					clearInterval(this.moveInterval);
+					this.moveInterval = undefined;
+				}
+			}
+
+
 			if ( 'item' in ev.dataAttr ) {
 				
 				var value = JSON.parse(ev.dataAttr.item);
