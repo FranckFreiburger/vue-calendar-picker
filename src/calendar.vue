@@ -618,7 +618,7 @@ module.exports = {
 	props: {
 		locale: {
 			type: String,
-			default: navigator.language.toUpperCase(),
+			default: navigator.language.substr(0,2).toUpperCase(),
 			validator: function(value) {
 				
 				return value === value.toUpperCase();
