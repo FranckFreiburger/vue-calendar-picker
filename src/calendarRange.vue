@@ -2,6 +2,7 @@
 	<div style="user-select: none">
 		<calendar-events
 			v-for="i in useTwoCalendars? 2 : 1"
+			:key="i"
 			:locale="locale"
 			:compact="compact"
 			:initialView="initialView"
@@ -31,11 +32,8 @@ module.exports = {
 		initialView: {},
 		initialCurrent: {},
 		events: {},
+		itemClass: {},
 		
-		itemClass: {
-			type: Function,
-			default: function() {},
-		},
 		selection: {
 			type: Object,
 			required: true,

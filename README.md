@@ -39,13 +39,17 @@ npm install --save vue-calendar-picker
 * touch screen support
 * only one dependancy: [date-fns](https://date-fns.org/), Modern JavaScript date utility library
 
-vue-calendar-picker has 3 available components:
+`vue-calendar-picker` has 3 available components:
 * `calendar.vue`: simple calendar
 * `calendarEvents.vue`: `calendar.vue` + one-time events and date/time periods
 * `calendarRange.vue`: `calendarEvents.vue` + range selection
 
 
 ## API - `calendar.vue`
+
+### UI
+* click on date part in the calendar header area to modify it (zoom out)
+* click or double-click on the cell to zoom in. (from month view, use double-click to zoom in)
 
 ### Properties
 
@@ -67,6 +71,10 @@ Called for each calendar cell. The retun valus is used as className of the cell.
 
 
 ### Events
+
+### UI
+* event range are colored lines
+* event point are dots
 
 #### @action <sup>(eventType, eventActive, keyActive, range, rangeType)</sup>
 
@@ -93,7 +101,7 @@ The range name: `'minute'`, `'hour'`, `'day'`, `'week'`, `'month'`, `'year'`,
 
 ### Slots
 
-#### *default slot* <sup>scope: itemRange, layout / default: **empty**</sup>
+#### *default slot* <sup>scope: itemRange, layout / default: *empty*</sup>
 The content of calendar cells.
 
 ##### `itemRange` <sup>`{ start: Date, end: Date }`</sup>
@@ -107,40 +115,45 @@ The layout of the content, either `'horizontal'` or `'vertical'`.
 
 ### Properties
 
-#### :locale - see `calendar.vue` API.
-#### :compact - see `calendar.vue` API.
-#### :initialView - see `calendar.vue` API.
-#### :initialCurrent - see `calendar.vue` API.
-#### :itemClass - see `calendar.vue` API.
+#### :locale - see [calendar.vue](#api---calendarvue) API.
+#### :compact - see [calendar.vue](#api---calendarvue) API.
+#### :initialView - see [calendar.vue](#api---calendarvue) API.
+#### :initialCurrent - see [calendar.vue](#api---calendarvue) API.
+#### :itemClass - see [calendar.vue](#api---calendarvue) API.
 
-#### :events <sup>Array for `{ color: **CSS color**, start: Date, end: Date }`</sup>
+#### :events <sup>Array for `{ color: CSS color, start: Date, end: Date }`</sup>
 A list of one-time events and date/time periods to display in the calendar.  
-One-time events has the same `start` and `end` date or just no `end` date.
+One-time events has the same `start` and `end` date.
 
 #### :selection <sup>`{ start: Date, end: Date }`</sup>
 The current calendar selection. For display only.
 
 ### Events
 
-#### @action - see `calendar.vue` API.
+#### @action - see [calendar.vue](#api---calendarvue) API.
 
 
 
 ## API - `calendarRange.vue`
 
 Allow user selection.  
-The `selection` property object is modified according to the user's selection.
+The `selection` property object is modified according to the user's selection.  
+
+### UI
+* use mousedow + move or tap + move to select a range (also across calendars)
+* use ctrl + click to update the selection (disbled on touch screens)
+
 
 ### Properties
 
-#### :locale - see `calendar.vue` API.
-#### :compact - see `calendar.vue` API.
-#### :initialView - see `calendar.vue` API.
-#### :initialCurrent - see `calendar.vue` API.
-#### :itemClass - see `calendar.vue` API.
+#### :locale - see [calendar.vue](#api---calendarvue) API.
+#### :compact - see [calendar.vue](#api---calendarvue) API.
+#### :initialView - see [calendar.vue](#api---calendarvue) API.
+#### :initialCurrent - see [calendar.vue](#api---calendarvue) API.
+#### :itemClass - see [calendar.vue](#api---calendarvue) API.
 
-#### :events - see `calendarEvents.vue` API.
-#### :selection - see `calendarEvents.vue` API.
+#### :events - see [calendarEvents.vue](#api---calendareventsvue) API.
+#### :selection - see [calendarEvents.vue](#api---calendareventsvue) API.
 
 #### :useTwoCalendars <sup>boolean, default: `false`</sup>
 Display two calendars side-by-side to make selection easier.
@@ -148,7 +161,7 @@ Display two calendars side-by-side to make selection easier.
 
 ### Events
 
-#### @action - see `calendarEvents.vue` API.
+#### @action - see [calendarEvents.vue](#api---calendareventsvue) API.
 
 
 

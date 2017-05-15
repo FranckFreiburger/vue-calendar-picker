@@ -228,7 +228,7 @@
 .calendar {
 	position: relative;
 	
-	width: 18em;
+	width: 20em;
 	height: 16em;
 	
 	font-family: arial;
@@ -317,6 +317,7 @@
 .calendar span[data-item]:hover {
 	/*background-color: #eee;*/
 	outline: 1px dotted #000;
+	outline-offset: -1px;
 }
 
 .calendar .this {
@@ -427,7 +428,7 @@
 
 .calendar .yearView .cellHead,
 .calendar .decadeView .cellHead {
-	padding: 0.25em;
+	padding: 0.2em;
 }
 
 </style>
