@@ -491,7 +491,7 @@ function onpointer() {
 	}
 
 	function hasPointerActive(ev) {
-		
+
 		return ev.buttons !== 0;
 	}
 
@@ -541,7 +541,7 @@ function onpointer() {
 		cx.callback({ eventType:'press', eventTarget:ev.target, pointerActive:false, keyActive:hasKeyActive(ev)});
 	}
 	
-	function mouseMoveHandler(cx, ev) {
+	function mouseOverHandler(cx, ev) {
 
 		cx.callback({ eventType:'over', eventTarget:ev.target, pointerActive:hasPointerActive(ev), keyActive:hasKeyActive(ev)});
 	}
@@ -576,7 +576,7 @@ function onpointer() {
 			var offTouchend = eventListener(el, 'touchend', touchEndHandler.bind(this, cx));
 			var offClick = eventListener(el, 'click', clickHandler.bind(this, cx));
 			var offDblclick = eventListener(el, 'dblclick', dblclickHandler.bind(this, cx));
-			var offMousemove = eventListener(el, 'mousemove', mouseMoveHandler.bind(this, cx));
+			var offMouseover = eventListener(el, 'mouseover', mouseOverHandler.bind(this, cx));
 			var offMousedown = eventListener(el, 'mousedown', mouseDownHandler.bind(this, cx));
 			var offMouseup = eventListener(el, 'mouseup', mouseUpHandler.bind(this, cx));
 			
@@ -589,7 +589,7 @@ function onpointer() {
 				offTouchend();
 				offClick();
 				offDblclick();
-				offMousemove();
+				offMouseover();
 				offMousedown();
 				offMouseup();
 				
