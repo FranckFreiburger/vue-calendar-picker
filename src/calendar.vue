@@ -580,6 +580,8 @@ function onpointer() {
 			var offMousedown = eventListener(el, 'mousedown', mouseDownHandler.bind(this, cx));
 			var offMouseup = eventListener(el, 'mouseup', mouseupHandler.bind(this, cx));
 			
+			var offDragStart = eventListener(el, 'selectstart', function(ev) { ev.preventDefault() } ); // for IE9
+			
 			cx.removeListeners = function() {
 				
 				offTouchstart();
@@ -590,6 +592,8 @@ function onpointer() {
 				offMousemove();
 				offMousedown();
 				offMouseup();
+				
+				offDragStart();
 			}
 			
 			el._onpointerCx = cx;
@@ -618,7 +622,7 @@ module.exports = {
 	props: {
 		locale: {
 			type: String,
-			default: navigator.language.substr(0,2).toUpperCase(),
+			default: (navigator.language || navigator.userLanguage).substr(0,2).toUpperCase(),
 			validator: function(value) {
 				
 				return value === value.toUpperCase();
