@@ -49,9 +49,6 @@ npm install --save vue-calendar-picker
 
 ## API - `calendar.vue`
 
-### UI details
-* click on date part in the calendar header area to modify it (zoom out)
-* click or double-click on the cell to zoom in. (from month view, use double-click to zoom in)
 
 ### Properties
 
@@ -123,6 +120,11 @@ vue-calendar-picker can by styled easily, all css selectors are prefixed with `.
 }
 ```
 
+### UI details
+* click on date part in the calendar header area to modify it (zoom out)
+* click or double-click on the cell to zoom in. (from month view, use double-click to zoom in)
+
+
 
 ## API - `calendarEvents.vue`
 
@@ -149,8 +151,8 @@ The current calendar selection. For display only.
 
 `eventObject` has the same properties that [calendar.vue](#api---calendarvue) added:
 
-##### calendarEvent <sup>`{ start: Date, end: Date }`</sup>
-A reference to the `calendarEvent` related to the mouse/touch event otherwise undefined.
+##### calendarEvent <sup>object</sup>
+A reference to a calendar event (see `:events` property) related to the mouse/touch event, otherwise `undefined`.
 
 
 ### UI details
