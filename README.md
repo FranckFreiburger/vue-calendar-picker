@@ -34,7 +34,7 @@ npm install --save vue-calendar-picker
 * localized (see [supported locale list](https://github.com/date-fns/date-fns/tree/master/src/locale))
 * autodetect the first day of the week
 * animated (zoom & slide)
-* display One-time events and date/time period
+* display one-time events and date/time period
 * date/time period selection
 * touch screen support
 * only one dependancy: [date-fns](https://date-fns.org/), Modern JavaScript date utility library
@@ -165,6 +165,40 @@ Display two calendars side-by-side to make selection easier.
 
 
 
+## Example - advanced
+```vue
+<template>
+    <calendar-range :events="calendarEvents" :selection="calendarSelection"></calendar-range>
+</template>
+
+<script>
+
+import {calendarRange} from 'vue-calendar'
+
+export default {
+    components: {
+        calendarRange: calendarRange
+    },
+    data() {
+        return {
+            calendarEvents: [
+                // periods
+                { color:'#aaf', start: new Date(2016, 9, 5, 0,0,0,0), end: new Date(2017, 4, 15, 0,0,0,0) },
+                { color:'#afa', start: new Date(2016, 9, 5, 0,0,0,0), end: new Date(2017, 4, 13, 0,0,0,0) },
+                { color:'#faa', start: new Date(2017, 4, 8, 12,30, 0,0), end: new Date(2017, 4, 9, 6,30, 0,0) },
+                // one-time
+                { color:'#faa', start: new Date(2017, 4, 2, 0,0,0,0), end: new Date(2017, 4, 2, 0,0,0,0) },
+                { color:'#aaa', start: new Date(2017, 4, 2, 0,0,0,0), end: new Date(2017, 4, 2, 0,0,0,0) },
+            ],
+            calendarSelection: {
+                start: new Date(2017, 4, 2), end: new Date(2017, 4, 7, 12)
+            }
+        }
+    }
+}
+</script>
+
+```
 
 
 
