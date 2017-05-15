@@ -572,7 +572,7 @@ function onpointer() {
 			var offMousedown = eventListener(el, 'mousedown', mouseDownHandler.bind(this, binding));
 			var offMouseup = eventListener(el, 'mouseup', mouseupHandler.bind(this, binding));
 			
-			binding.removeListeners = function() {
+			el._onpointer_removeListeners = function() {
 				
 				offTouchstart();
 				offTouchmove();
@@ -586,7 +586,7 @@ function onpointer() {
 		},
 		unbind: function(el, binding, vnode, oldVnode) {
 			
-			binding.removeListeners();
+			el._onpointer_removeListeners();
 		},
 	}
 }
