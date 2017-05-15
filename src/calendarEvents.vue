@@ -21,7 +21,7 @@
 				<div
 					class="eventAt"
 					v-for="event in events"
-					v-if="df.isEqual(event.start, event.end) && df.isWithinRange(event.start, p.itemRange.start, p.itemRange.end)"
+					v-if="df.isEqual(event.start, event.end) && df.isWithinRange(event.start, p.itemRange.start, p.itemRange.end) && !df.isEqual(event.end, p.itemRange.end)"
 					:style="{ backgroundColor: event.color }"
 				></div>
 			</div>
