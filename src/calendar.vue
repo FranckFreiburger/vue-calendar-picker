@@ -572,6 +572,7 @@ function onpointer() {
 			cx.offEvent.push( eventListener(el, 'mousedown', mouseDownHandler.bind(this, cx)) );
 			cx.offEvent.push( eventListener(el, 'mouseup', mouseUpHandler.bind(this, cx)) );
 
+			// IE9 does not update ev.buttons on mouseover event
 			cx.offEvent.push( eventListener(document, 'mousedown', function(ev) { cx.buttonState = true } ) );
 			cx.offEvent.push( eventListener(document, 'mouseup', function(ev) { cx.buttonState = false } ) );
 
@@ -587,6 +588,7 @@ function onpointer() {
 		},
 		unbind: function(el, binding, vnode, oldVnode) {
 			
+			var cx = el._onpointerCx;
 			while ( cx.offEvent.length !== 0 )
 				cx.offEvent.pop()();
 			el._onpointerCx = null;
