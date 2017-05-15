@@ -51,7 +51,7 @@ module.exports = {
 	methods: {
 		action: function(ev) {
 
-			if ( ev.eventType === 'down' ) {
+			if ( ev.eventType === 'down' && 'range' in ev ) {
 				
 				if ( ev.keyActive ) {
 					
@@ -77,7 +77,7 @@ module.exports = {
 			if ( ev.eventType === 'up' )
 				this.ref = null;
 
-			if ( ev.eventType === 'over' && ev.pointerActive ) {
+			if ( ev.eventType === 'over' && ev.pointerActive && 'range' in ev ) {
 				
 				if ( this.ref ) {
 					
