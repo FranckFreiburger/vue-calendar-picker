@@ -1,6 +1,8 @@
 # vue-calendar-picker
 Calendar component
 
+![vue-calendar-picker screenshot](https://cloud.githubusercontent.com/assets/25509586/26058700/40d539be-397f-11e7-86ad-d0af0f21e64d.png)
+
 ## Browser support
 Same browser support as [Vue.js 2](https://github.com/vuejs/vue/blob/dev/README.md)
 
