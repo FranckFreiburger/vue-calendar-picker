@@ -490,12 +490,6 @@ function onpointer() {
 		return ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey;
 	}
 
-	function hasPointerActive(ev) {
-
-		return ev.buttons !== 0;
-	}
-
-
 
 	function touchStartHandler(cx, ev) {
 
@@ -543,7 +537,7 @@ function onpointer() {
 	
 	function mouseOverHandler(cx, ev) {
 
-		cx.callback({ eventType:'over', eventTarget:ev.target, pointerActive:hasPointerActive(ev), keyActive:hasKeyActive(ev)});
+		cx.callback({ eventType:'over', eventTarget:ev.target, pointerActive:cx.buttonState, keyActive:hasKeyActive(ev)});
 	}
 	
 	function mouseDownHandler(cx, ev) {
@@ -572,15 +566,22 @@ function onpointer() {
 				offEvent: []
 			}
 			
-			cx.offEvent.push( eventListener(el, 'touchstart', touchStartHandler.bind(this, cx)) );
-			cx.offEvent.push( eventListener(el, 'touchmove', touchMoveHandler.bind(this, cx)) );
-			cx.offEvent.push( eventListener(el, 'touchend', touchEndHandler.bind(this, cx)) );
 			cx.offEvent.push( eventListener(el, 'click', clickHandler.bind(this, cx)) );
 			cx.offEvent.push( eventListener(el, 'dblclick', dblclickHandler.bind(this, cx)) );
 			cx.offEvent.push( eventListener(el, 'mouseover', mouseOverHandler.bind(this, cx)) );
 			cx.offEvent.push( eventListener(el, 'mousedown', mouseDownHandler.bind(this, cx)) );
 			cx.offEvent.push( eventListener(el, 'mouseup', mouseUpHandler.bind(this, cx)) );
-			cx.offEvent.push( eventListener(el, 'selectstart', function(ev) { ev.preventDefault() } ) ); // for IE9
+
+			cx.offEvent.push( eventListener(document, 'mousedown', function(ev) { cx.buttonState = true } ) );
+			cx.offEvent.push( eventListener(document, 'mouseup', function(ev) { cx.buttonState = false } ) );
+
+			// touch screen
+			cx.offEvent.push( eventListener(el, 'touchstart', touchStartHandler.bind(this, cx)) );
+			cx.offEvent.push( eventListener(el, 'touchmove', touchMoveHandler.bind(this, cx)) );
+			cx.offEvent.push( eventListener(el, 'touchend', touchEndHandler.bind(this, cx)) );
+			
+			// for IE9
+			cx.offEvent.push( eventListener(el, 'selectstart', function(ev) { ev.preventDefault() } ) );
 
 			el._onpointerCx = cx;
 		},
