@@ -138,9 +138,9 @@ module.exports = {
 	},
 	methods: {
 
-		thisItemClass: function(range) {
+		thisItemClass: function(range, type) {
 			
-			var classlist = [this.itemClass(range)];
+			var classlist = [this.itemClass(range, type)];
 
 			var start = this.selection.start;
 			var end = this.selection.end;

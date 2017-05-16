@@ -19,7 +19,7 @@
 						<span
 							v-for="range in [getItemRange(df.setMinutes(current, (y-1) + (x-1)*15 ), 'minute')]"
 							v-data:item.json="[+range.start/10000, 'minute']"
-							:class="[ { this: df.isSameMinute(today, range.start) }, itemClass(range) ]"
+							:class="[ { this: df.isSameMinute(today, range.start) }, itemClass(range, 'minute') ]"
 						>
 							<span class="cellHead">{{df.format(range.start, 'mm')}}</span>
 							<slot :item-range="range" layout="vertical"></slot>
@@ -34,7 +34,7 @@
 						<span
 							v-for="range in [getItemRange(df.setHours(current, (y-1) + (x-1)*12 ), 'hour')]"
 							v-data:item.json="[+range.start/10000, 'hour']"
-							:class="[ { this: df.isSameHour(today, range.start) }, itemClass(range) ]"
+							:class="[ { this: df.isSameHour(today, range.start) }, itemClass(range, 'hour') ]"
 						>
 							<span class="cellHead">{{df.format(range.start, 'HH')}}<sup>h</sup></span>
 							<slot :item-range="range" layout="vertical"></slot>
@@ -60,7 +60,7 @@
 						<span
 							v-for="range in [getItemRange(df.addHours(df.addDays(df.startOfWeek(current, { weekStartsOn: firstDayOfTheWeek }), x-1), y-1), 'hour')]"
 							v-data:item.json="[+range.start/10000, 'hour']"
-							:class="[ { thisMonth: df.isSameMonth(current, range.start) }, itemClass(range) ]"
+							:class="[ { thisMonth: df.isSameMonth(current, range.start) }, itemClass(range, 'hour') ]"
 						>
 							<slot :item-range="range" layout="vertical"></slot>
 						</span>
@@ -85,7 +85,7 @@
 						<span
 							v-for="range in [getItemRange(df.addDays(firstDayOfMonthView, (y-1) * 7 + (x-1)), 'day')]"
 							v-data:item.json="[+range.start/10000, 'day']"
-							:class="[ { this: df.isSameDay(today, range.start), notThisMonth: !df.isSameMonth(current, range.start) }, itemClass(range) ]"
+							:class="[ { this: df.isSameDay(today, range.start), notThisMonth: !df.isSameMonth(current, range.start) }, itemClass(range, 'day') ]"
 						>
 							<span class="cellHead" v-text="df.getDate(range.start)"></span>
 							<slot :item-range="range" layout="horizontal"></slot>
@@ -100,7 +100,7 @@
 						<span
 							v-for="range in [getItemRange(df.setMonth(current, (y-1)*4 + (x-1)), 'month')]"
 							v-data:item.json="[+range.start/10000, 'month']"
-							:class="[ { this: df.isSameMonth(today, range.start) }, itemClass(range) ]"
+							:class="[ { this: df.isSameMonth(today, range.start) }, itemClass(range, 'month') ]"
 						>
 							<span class="cellHead" v-text="format(range.start, compact ? 'MMM' : 'MMMM')"></span>
 							<slot :item-range="range" layout="horizontal"></slot>
@@ -115,7 +115,7 @@
 						<span
 							v-for="range in [getItemRange(df.addYears(current, (y-1)*4 + (x-1) - 9), 'year')]"
 							v-data:item.json="[+range.start/10000, 'year']"
-							:class="[ { this: df.isSameYear(today, range.start) }, itemClass(range) ]"
+							:class="[ { this: df.isSameYear(today, range.start) }, itemClass(range, 'year') ]"
 						>
 							<span class="cellHead" v-text="df.getYear(range.start)"></span>
 						</span>
@@ -315,7 +315,6 @@
 /* highlighting */
 
 .calendar span[data-item]:hover {
-	/*background-color: #eee;*/
 	outline: 1px dotted #000;
 }
 
@@ -801,17 +800,18 @@ module.exports = {
 				var value = JSON.parse(ev.dataAttr.item);
 				var date = df.parse(value[0]*10000); // 10000: currently, min resolution is "minute"
 				ev.type = value[1];
+				ev.range = this.getItemRange(date, ev.type);
 				
 				if ( !ev.keyActive && ev.eventType === 'tap' ) {
 					
 					switch ( ev.type ) {
 						case 'month':
 							this.view = VIEW.MONTH;
-							this.current = date;
+							this.current = ev.range.start;
 							return;
 						case 'year':
 							this.view = VIEW.YEAR;
-							this.current = date;
+							this.current = ev.range.start;
 							return;
 					}
 				}
@@ -821,20 +821,18 @@ module.exports = {
 					switch ( ev.type ) {
 						case 'hour':
 							this.view = VIEW.HOUR;
-							this.current = date;
+							this.current = ev.range.start;
 							return;
 						case 'day':
 							this.view = VIEW.DAY;
-							this.current = date;
+							this.current = ev.range.start;
 							return;
 						case 'week':
 							this.view = VIEW.WEEK;
-							this.current = date;
+							this.current = ev.range.start;
 							return;
 					}
 				}
-				
-				ev.range = this.getItemRange(date, ev.type);
 			}
 			
 			this.$emit('action', ev);
