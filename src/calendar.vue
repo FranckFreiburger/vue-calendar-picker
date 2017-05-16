@@ -630,7 +630,7 @@ module.exports = {
 			default: VIEW.MONTH,
 		},
 		initialCurrent: {
-			type: Date,
+			type: [Date, String, Number],
 			default: function() {
 				return new Date
 			}
