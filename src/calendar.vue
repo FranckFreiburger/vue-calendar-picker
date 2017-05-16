@@ -604,7 +604,10 @@ module.exports = {
 
 			if ( isEq(binding.value, binding.oldValue) )
 				return;
-			el.dataset[binding.arg] = binding.modifiers.json === true ? JSON.stringify(binding.value) : String(binding.value);
+			// IE[9, 10] does not reflect dataset into dom attributes.
+			//el.dataset[binding.arg] = binding.modifiers.json === true ? JSON.stringify(binding.value) : String(binding.value);
+			el.setAttribute('data-'+binding.arg, binding.modifiers.json === true ? JSON.stringify(binding.value) : String(binding.value));
+			
 		},
 		onpointer: onpointer(),
 	},
