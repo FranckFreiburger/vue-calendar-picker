@@ -145,8 +145,6 @@ The current calendar selection. For display only.
 
 ### Events
 
-#### @action - see [calendar.vue](#api---calendarvue) API.
-
 #### @action <sup>(eventObject)</sup>
 
 `eventObject` has the same properties that [calendar.vue](#api---calendarvue) added:
