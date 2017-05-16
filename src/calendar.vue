@@ -317,12 +317,10 @@
 .calendar span[data-item]:hover {
 	/*background-color: #eee;*/
 	outline: 1px dotted #000;
-	outline-offset: -1px;
 }
 
 .calendar .this {
 	outline: 1px dotted #f55;
-	outline-offset: -1px;
 }
 
 
@@ -330,9 +328,11 @@
 
 .calendar .view {
 	display: table;
+	box-sizing: border-box;
 	width: 100%;
 	height: 100%;
 	line-height: 1;
+	padding: 1px;
 }
 
 .calendar .view > div {
@@ -343,21 +343,26 @@
 	display: table-cell;
 	vertical-align: top;
 	height: 0%;
+	line-height: 0.5;
 }
 
 .calendar .cellHead {
 	vertical-align: top;
+	line-height: 1;
 }
 
 
 /* hour */
 
-.hourView .cellHead {
+.calendar .hourView .cellHead {
 	display: inline-block;
 	width: 1em;
 	font-size: 75%;
 }
 
+.calendar .hourView > div > span {
+	height: 6%;
+}
 
 /* day */
 
@@ -367,6 +372,9 @@
 	width: 1.25em;
 }
 
+.calendar .dayView > div > span {
+	height: 8%;
+}
 
 /* week */
 
