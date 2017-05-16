@@ -48,6 +48,11 @@ npm install --save vue-calendar-picker
 * `calendarRange.vue`: `calendarEvents.vue` + range selection.
 
 
+## Conventions
+
+* date ranges are inclusive, exclusive ([start, end[)
+
+
 ## API - `calendar.vue`
 
 
