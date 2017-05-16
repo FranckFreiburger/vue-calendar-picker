@@ -342,6 +342,7 @@
 .calendar .view > div > span {
 	display: table-cell;
 	vertical-align: top;
+	height: 0%;
 }
 
 .calendar .cellHead {
@@ -397,7 +398,6 @@
 /* month */
 
 .calendar .monthView > div:first-child > span {
-	height: 1em;
 	padding: 0.25em;
 	text-align: center;
 }
