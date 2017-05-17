@@ -14,7 +14,7 @@ Calendar component
 
 <script>
 
-import {calendar} from 'vue-calendar'
+import {calendar} from 'vue-calendar-picker'
 
 export default {
     components: {
@@ -207,7 +207,7 @@ Same browser support as [Vue.js 2](https://github.com/vuejs/vue/blob/dev/README.
 
 <script>
 
-import {calendarRange} from 'vue-calendar'
+import {calendarRange} from 'vue-calendar-picker'
 
 export default {
     components: {
