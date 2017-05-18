@@ -74,6 +74,12 @@ Initial view date.
 #### :itemClass <sup>function(range), default: *empty function*<sup>
 Called for each calendar cell. The retun valus is used as className of the cell.
 
+#### :viewCount <sup>number, default: 1<sup>
+Allow to display multiple calendar views side-by-side.
+
+#### :showOverlappingDays <sup>boolean, default: viewCount === 1<sup>
+In the month view, show days belonging to the preceding and following month.
+
 
 ### Events
 
