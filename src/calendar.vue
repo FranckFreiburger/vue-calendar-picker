@@ -1,55 +1,72 @@
 <template>
-	<div class="calendar" :class="{ compact: compact }" v-onpointer="pointerEvent">
+	<div class="calendar" :class="{ compact: compact, multiView: viewCount > 1 }" v-onpointer="pointerEvent">
 		<div class="nav">
 			<span class="prev" data-nav="-1"></span>
 
-			<span v-if="view <= VIEW.YEAR" @click="view = VIEW.DECADE" v-text="df.getYear(current)"></span>
-			<span v-if="view <= VIEW.MONTH" @click="view = VIEW.YEAR" v-text="format(current, 'MMM')"></span>
-			<span v-if="view === VIEW.WEEK" @click="view = VIEW.MONTH" v-text="'W'+df.getISOWeek(current)"></span>
-			<span v-if="view <= VIEW.DAY" @click="view = VIEW.MONTH" v-text="df.getDate(current)"></span>
-			<span v-if="view <= VIEW.HOUR" @click="view = VIEW.DAY">{{df.format(current, 'HH')}}<sup>h</sup></span>
+			<span v-if="view <= PERIOD.YEAR" @click="view = PERIOD.DECADE" v-text="df.getYear(current)"></span>
+			<span v-if="view <= PERIOD.MONTH" @click="view = PERIOD.YEAR" v-text="format(current, 'MMM')"></span>
+			<span v-if="view === PERIOD.WEEK" @click="view = PERIOD.MONTH" v-text="'W'+df.getISOWeek(current)"></span>
+			<span v-if="view <= PERIOD.DAY" @click="view = PERIOD.MONTH" v-text="df.getDate(current)"></span>
+			<span v-if="view <= PERIOD.HOUR" @click="view = PERIOD.DAY">{{df.format(current, 'HH')}}<sup>h</sup></span>
 
 			<span class="next" data-nav="1"></span>
 		</div>
 		<transition-group :name="animation" @after-enter="animation = ''" class="animation">
 
-			<div v-if="view === VIEW.HOUR" class="view hourView timeVertical" :key="posId">
+			<template v-for="current in views(current, view, viewCount)">
+
+			<div
+				v-if="view === PERIOD.HOUR"
+				class="view hourView timeVertical"
+				:key="viewId(current)"
+				:style="{ width: (100/viewCount)+'%' }"
+			>
 				<div v-for="y in 15">
 					<template v-for="x in 4">
 						<span
-							v-for="range in [getItemRange(df.setMinutes(current, (y-1) + (x-1)*15 ), 'minute')]"
-							v-data:item.json="[+range.start/10000, 'minute']"
-							:class="[ { this: df.isSameMinute(today, range.start) }, itemClass(range, 'minute') ]"
+							v-for="range in [getItemRange(df.setMinutes(current, (y-1) + (x-1)*15 ), PERIOD.MINUTE)]"
+							v-data:item.json="[+range.start/10000, PERIOD.MINUTE]"
+							:class="[ { this: df.isSameMinute(today, range.start) }, itemClass(range, PERIOD.MINUTE) ]"
 						>
-							<span class="cellHead">{{df.format(range.start, 'mm')}}</span>
+							<div class="cellHead">{{df.format(range.start, 'mm')}}</div>
 							<slot :item-range="range" layout="vertical"></slot>
 						</span>
 					</template>
 				</div>
 			</div>
 
-			<div v-if="view === VIEW.DAY" class="view dayView timeVertical" :key="posId">
+			<div
+				v-if="view === PERIOD.DAY"
+				class="view dayView timeVertical"
+				:key="viewId(current)"
+				:style="{ width: (100/viewCount)+'%' }"
+			>
 				<div v-for="y in 12">
 					<template v-for="x in 2">
 						<span
-							v-for="range in [getItemRange(df.setHours(current, (y-1) + (x-1)*12 ), 'hour')]"
-							v-data:item.json="[+range.start/10000, 'hour']"
-							:class="[ { this: df.isSameHour(today, range.start) }, itemClass(range, 'hour') ]"
+							v-for="range in [getItemRange(df.setHours(current, (y-1) + (x-1)*12 ), PERIOD.HOUR)]"
+							v-data:item.json="[+range.start/10000, PERIOD.HOUR]"
+							:class="[ { this: df.isSameHour(today, range.start) }, itemClass(range, PERIOD.HOUR) ]"
 						>
-							<span class="cellHead">{{df.format(range.start, 'HH')}}<sup>h</sup></span>
+							<div class="cellHead">{{df.format(range.start, 'HH')}}<sup>h</sup></div>
 							<slot :item-range="range" layout="vertical"></slot>
 						</span>
 					</template>
 				</div>
 			</div>
 
-			<div v-if="view === VIEW.WEEK" class="view weekView timeVertical" :key="posId">
+			<div
+				v-if="view === PERIOD.WEEK"
+				class="view weekView timeVertical"
+				:key="viewId(current)"
+				:style="{ width: (100/viewCount)+'%' }"
+			>
 				<div>
 					<span></span>
 					<template v-for="x in 7">
 						<span
-							v-for="arg in [df.addDays(df.startOfWeek(current, { weekStartsOn: firstDayOfTheWeek }), x-1)]"
-							v-data:item.json="[+arg/10000, 'day']"
+							v-for="arg in [df.addDays(df.startOfWeek(current, dfOptions), x-1)]"
+							v-data:item.json="[+arg/10000, PERIOD.DAY]"
 							:class="[ { this: df.isSameDay(today, arg) } ]"
 						>{{format(arg, 'dd')}}<sub>{{df.getDate(arg)}}</sub></span>
 					</template>
@@ -58,9 +75,9 @@
 					<span v-text="y-1"></span>
 					<template v-for="x in 7">
 						<span
-							v-for="range in [getItemRange(df.addHours(df.addDays(df.startOfWeek(current, { weekStartsOn: firstDayOfTheWeek }), x-1), y-1), 'hour')]"
-							v-data:item.json="[+range.start/10000, 'hour']"
-							:class="[ { thisMonth: df.isSameMonth(current, range.start) }, itemClass(range, 'hour') ]"
+							v-for="range in [getItemRange(df.addHours(df.addDays(df.startOfWeek(current, dfOptions), x-1), y-1), PERIOD.HOUR)]"
+							v-data:item.json="[+range.start/10000, PERIOD.HOUR]"
+							:class="[ { thisMonth: df.isSameMonth(current, range.start) }, itemClass(range, PERIOD.HOUR) ]"
 						>
 							<slot :item-range="range" layout="vertical"></slot>
 						</span>
@@ -68,162 +85,144 @@
 				</div>
 			</div>
 
-			<div v-if="view === VIEW.MONTH" class="view monthView timeHorizontal" :key="posId">
+			<div
+				v-if="view === PERIOD.MONTH"
+				class="view monthView timeHorizontal"
+				:key="viewId(current)"
+				:style="{ width: (100/viewCount)+'%' }"
+			>
 				<div>
 					<span v-if="!compact"></span>
 					<span v-for="n in 7" v-text="format(df.setDay(current, firstDayOfTheWeek+n-1), compact ? 'dd' : 'ddd')"></span>
 				</div>
-				<div v-for="y in compact ? visibleWeeksCount : 6">
-					<template v-for="week in [df.addDays(firstDayOfMonthView, (y-1) * 7)]">
+				<div v-for="y in compact ? visibleWeeksCount(current) : 6">
+					<template v-for="week in [df.addDays(firstDayOfMonth(current), (y-1) * 7)]">
 						<span
-							v-if="!compact"
-							v-data:item.json="[+week/10000, 'week']"
+							v-if="!compact && (y <= visibleWeeksCount(current) || viewCount === 1)"
+							v-data:item.json="[+week/10000, PERIOD.WEEK]"
 							v-text="df.getISOWeek(week)"
 						></span>
 					</template>
 					<template v-for="x in 7">
-						<span
-							v-for="range in [getItemRange(df.addDays(firstDayOfMonthView, (y-1) * 7 + (x-1)), 'day')]"
-							v-data:item.json="[+range.start/10000, 'day']"
-							:class="[ { this: df.isSameDay(today, range.start), notThisMonth: !df.isSameMonth(current, range.start) }, itemClass(range, 'day') ]"
+						<span v-if="showOverlappingDays || df.isSameMonth(current, range.start)"
+							v-for="range in [getItemRange(df.addDays(firstDayOfMonth(current), (y-1) * 7 + (x-1)), PERIOD.DAY)]"
+							v-data:item.json="[+range.start/10000, PERIOD.DAY]"
+							:class="[ { this: df.isSameDay(today, range.start), notThisMonth: !df.isSameMonth(current, range.start) }, itemClass(range, PERIOD.DAY) ]"
 						>
-							<span class="cellHead" v-text="df.getDate(range.start)"></span>
+							<div class="cellHead" v-text="df.getDate(range.start)"></div>
 							<slot :item-range="range" layout="horizontal"></slot>
 						</span>
+						<span v-else></span>
 					</template>
 				</div>
 			</div>
 			
-			<div v-if="view === VIEW.YEAR" class="view yearView timeHorizontal" :key="posId">
+			<div
+				v-if="view === PERIOD.YEAR"
+				class="view yearView timeHorizontal"
+				:key="viewId(current)"
+				:style="{ width: (100/viewCount)+'%' }"
+			>
 				<div v-for="y in 3">
 					<template v-for="x in 4">
 						<span
-							v-for="range in [getItemRange(df.setMonth(current, (y-1)*4 + (x-1)), 'month')]"
-							v-data:item.json="[+range.start/10000, 'month']"
-							:class="[ { this: df.isSameMonth(today, range.start) }, itemClass(range, 'month') ]"
+							v-for="range in [getItemRange(df.setMonth(current, (y-1)*4 + (x-1)), PERIOD.MONTH)]"
+							v-data:item.json="[+range.start/10000, PERIOD.MONTH]"
+							:class="[ { this: df.isSameMonth(today, range.start) }, itemClass(range, PERIOD.MONTH) ]"
 						>
-							<span class="cellHead" v-text="format(range.start, compact ? 'MMM' : 'MMMM')"></span>
+							<div class="cellHead" v-text="format(range.start, compact ? 'MMM' : 'MMMM')"></div>
 							<slot :item-range="range" layout="horizontal"></slot>
 						</span>
 					</template>
 				</div>
 			</div>
 
-			<div v-if="view === VIEW.DECADE" class="view decadeView timeHorizontal" :key="posId">
+			<div
+				v-if="view === PERIOD.DECADE"
+				class="view decadeView timeHorizontal"
+				:key="viewId(current)"
+				:style="{ width: (100/viewCount)+'%' }"
+			>
 				<div v-for="y in 4">
 					<template v-for="x in 4">
 						<span
-							v-for="range in [getItemRange(df.addYears(current, (y-1)*4 + (x-1) - 9), 'year')]"
-							v-data:item.json="[+range.start/10000, 'year']"
-							:class="[ { this: df.isSameYear(today, range.start) }, itemClass(range, 'year') ]"
+							v-for="range in [getItemRange(df.addYears(current, (y-1)*4 + (x-1) - 9), PERIOD.YEAR)]"
+							v-data:item.json="[+range.start/10000, PERIOD.YEAR]"
+							:class="[ { this: df.isSameYear(today, range.start) }, itemClass(range, PERIOD.YEAR) ]"
 						>
-							<span class="cellHead" v-text="df.getYear(range.start)"></span>
+							<div class="cellHead" v-text="df.getYear(range.start)"></div>
 						</span>
 					</template>
 				</div>
 			</div>
+			
+			</template>
 		</transition-group>
 	</div>
 </template>
 
 <style>
 
-.calendar .forwardSlide-enter-active {
-	position: absolute;
-	animation: calendar-slide-out .5s ease;
+
+.view {
+	transition-duration: .5s;
+	transition-timing-function: ease-out;
+	transition-property: transform, opacity;
 }
 
-.calendar .forwardSlide-leave-active {
-	position: absolute;
-	animation: calendar-slide-in .5s ease;
+.calendar .forwardSlide-leave-to,
+.calendar .reverseSlide-enter {
+	transform: translateX(-100%);
+	opacity: 0;
 }
 
-.calendar .reverseSlide-enter-active {
-	position: absolute;
-	animation: calendar-slide-in .5s ease-in reverse;
+.calendar .forwardSlide-enter,
+.calendar .reverseSlide-leave-to {
+	transform: translateX(100%);
+	opacity: 0;
+}
+
+.calendar.multiView .reverseSlide-leave-to {
+	transform: translateX(0);
 }
 
 .calendar .reverseSlide-leave-active {
 	position: absolute;
-	animation: calendar-slide-out .5s ease-in reverse;
-}
-
-@keyframes calendar-slide-in {
-	from {
-		transform: translateX(0%);
-		opacity: 1;
-	}
-	to {
-		transform: translateX(-100%);
-		opacity: 0;
-	}
-}
-
-@keyframes calendar-slide-out {
-	from {
-		transform: translateX(100%);
-		opacity: 0;
-	}
-	to {
-		transform: translateX(0%);
-		opacity: 1;
-	}
 }
 
 
-.calendar .forwardScale-enter-active {
-	position: relative;
-	animation: calendar-scale-out .5s ease;
-	transform-origin: 50% 50%;
+
+.calendar .forwardScale-leave-to,
+.calendar .reverseScale-enter {
+	transform: scale(.5);
+	opacity: 0;
+}
+
+.calendar .forwardScale-enter,
+.calendar .reverseScale-leave-to {
+	transform: scale(1.5);
+	opacity: 0;
+}
+
+.calendar .forwardScale-leave-active,
+.calendar .reverseScale-leave-active {
+	position: absolute;
 }
 
 .calendar .forwardScale-leave-active {
-	position: absolute;
-	animation: calendar-scale-in .5s ease;
-	transform-origin: 50% 50%;
+	transform-origin: inherit;
 }
 
-.calendar .reverseScale-enter-active {
-	position: relative;
-	animation: calendar-scale-in .5s ease-in reverse;
-	transform-origin: 50% 50%;
-}
-
-.calendar .reverseScale-leave-active {
-	position: absolute;
-	animation: calendar-scale-out .5s ease-in reverse;
-	transform-origin: 50% 50%;
-}
-
-
-@keyframes calendar-scale-in {
-	from {
-		transform: scale(1);
-		opacity: 1;
-	}
-	to {
-		transform: scale(0.5);
-		opacity: 0;
-	}
-}
-
-@keyframes calendar-scale-out {
-	from {
-		transform: scale(1.5);
-		opacity: 0;
-	}
-	to {
-		transform: scale(1);
-		opacity: 1;
-	}
-}
 
 .calendar .animation {
-	display: block;
+	display: inline-block;
 	position: relative;
 	height: 100%;
+	width: 100%;
 	overflow: hidden;
+	white-space: nowrap;
 }
+
 
 .calendar {
 	position: relative;
@@ -326,13 +325,39 @@
 /* view */
 
 .calendar .view {
-	display: table;
+	display: inline-table;
 	box-sizing: border-box;
 	width: 100%;
 	height: 100%;
 	line-height: 1;
 	padding: 1px;
 }
+
+/*
+.calendar.multiView .view {
+	border-left: 1px solid silver;
+}
+
+.calendar.multiView .view.forwardScale-leave-to,
+.calendar.multiView .view.forwardSlide-leave-to {
+	border-right: 1px solid silver;
+}
+
+.calendar.multiView .view:first-child,
+.calendar.multiView .view.forwardSlide-leave-to + .view {
+	border-left: none;
+}
+
+
+.calendar.multiView:not(.compact) .view {
+	padding-left: 0.5em;
+}
+
+.calendar.multiView:not(.compact) .view:first-child,
+.calendar.multiView:not(.compact) .forwardSlide-leave-to + .view {
+	padding-left: 0;
+}
+*/
 
 .calendar .view > div {
 	display: table-row;
@@ -413,11 +438,11 @@
 	text-align: center;
 	font-weight: bold;
 	padding-right: 0.25em;
+	line-height: 1;
 }
 
 .calendar .monthView .cellHead {
 	text-align: center;
-	display: block;
 }
 
 .calendar .monthView .notThisMonth .cellHead {
@@ -480,7 +505,8 @@ function isEq(val1, val2) {
 	return false;
 }
 
-var VIEW = {
+var PERIOD = {
+	MINUTE: 2,
 	HOUR: 3,
 	DAY: 4,
 	WEEK: 5,
@@ -634,12 +660,23 @@ module.exports = {
 		},
 		initialView: {
 			type: Number,
-			default: VIEW.MONTH,
+			default: PERIOD.MONTH,
 		},
 		initialCurrent: {
 			type: [Date, String, Number],
 			default: function() {
 				return new Date
+			}
+		},
+		viewCount: {
+			type: Number,
+			default: 1,
+		},
+		showOverlappingDays: {
+			type: Boolean,
+			default: function() {
+
+				return this.viewCount === 1;
 			}
 		},
 		itemClass: {
@@ -672,11 +709,6 @@ module.exports = {
 
 	computed: {
 		
-		posId: function() {
-			
-			return String(this.view) + String(df.getTime(this.current));
-		},
-		
 		firstDayOfTheWeek: function() {
 					
 			if (' GB AG AR AS AU BR BS BT BW BZ CA CN CO DM DO ET GT GU HK HN ID IE IL IN JM JP KE KH KR LA MH MM MO MT MX MZ NI NP NZ PA PE PH PK PR PY SA SG SV TH TN TT TW UM US VE VI WS YE ZA ZW '.indexOf(' '+this.locale+' ') !== -1 )
@@ -688,68 +720,69 @@ module.exports = {
 			return 1; // mon
 		},
 		
-		visibleWeeksCount: function() {
-
-			return Math.ceil((df.getDaysInMonth(this.current) + df.getDay(df.startOfMonth(this.current)) ) / 7);
-		},
-
-		firstDayOfMonthView: function() {
-			
-			return df.setDay(df.startOfMonth(this.current), this.firstDayOfTheWeek);
-		},
-		
 		dateFnsLocale: function() {
 			
 			return require('date-fns/locale/'+this.locale.toLowerCase()+'/index.js');
+		},
+		
+		dfOptions: function() {
+			return { weekStartsOn: this.firstDayOfTheWeek };
 		}
 	},
 	
 	methods: {
+		
+		views: function(current, type, count) {
+			
+			var views = new Array(count);
+			for ( var i = 0; i < count; ++i )
+				views[i] = this.dateAdd(current, type, i);
+			return views;
+		},
+		
+		viewId: function(current) {
+			
+			return String(this.view) + String(df.getTime(current));
+		},
+
 		format: function(date, format) {
 
 			return df.format(date, format, { locale: this.dateFnsLocale });
+		},
+
+		firstDayOfMonth: function(date) {
+			
+			return df.setDay(df.startOfMonth(date), this.firstDayOfTheWeek);
+		},
+		
+		visibleWeeksCount: function(current) {
+
+			return Math.ceil((df.getDaysInMonth(current) + df.getDay(df.startOfMonth(current))) / 7);
+		},
+		
+		
+		dateAdd: function(date, type, count) {
+			
+			switch ( type ) {
+				case PERIOD.MINUTE: return df.addMinutes(date, count);
+				case PERIOD.HOUR: return df.addHours(date, count);
+				case PERIOD.DAY: return df.addDays(date, count);
+				case PERIOD.WEEK: return df.addWeeks(date, count);
+				case PERIOD.MONTH: return df.addMonths(date, count);
+				case PERIOD.YEAR: return df.addYears(date, count);
+				case PERIOD.DECADE: return df.addYears(date, 16 * count);
+			}
 		},
 		
 		getItemRange: function(date, type) {
 			
 			switch ( type ) {
-				case 'minute':
-					return { start: df.startOfMinute(date), end: df.startOfMinute(df.addMinutes(date, 1)) };
-				case 'hour':
-					return { start: df.startOfHour(date), end: df.startOfHour(df.addHours(date, 1)) };
-				case 'day':
-					return { start: df.startOfDay(date), end: df.startOfDay(df.addDays(date, 1)) };
-				case 'week':
-					var options = { weekStartsOn: this.firstDayOfTheWeek };
-					return { start: df.startOfWeek(date, options), end: df.startOfWeek(df.addWeeks(date, 1), options) };
-				case 'month':
-					return { start: df.startOfMonth(date), end: df.startOfMonth(df.addMonths(date, 1)) };
-				case 'year':
-					return { start: df.startOfYear(date), end: df.startOfYear(df.addYears(date, 1)) };
-			}
-		},
-
-		move: function(dir) {
-			
-			switch ( this.view ) {
-				case VIEW.HOUR:
-					this.current = df.addHours(this.current, dir);
-					break;
-				case VIEW.DAY:
-					this.current = df.addDays(this.current, dir);
-					break;
-				case VIEW.WEEK:
-					this.current = df.addWeeks(this.current, dir);
-					break;
-				case VIEW.MONTH:
-					this.current = df.addMonths(this.current, dir);
-					break;
-				case VIEW.YEAR:
-					this.current = df.addYears(this.current, dir);
-					break;
-				case VIEW.DECADE:
-					this.current = df.addYears(this.current, 16 * dir);
-					break;
+				case PERIOD.MINUTE: return { start: df.startOfMinute(date), end: df.startOfMinute(df.addMinutes(date, 1)) };
+				case PERIOD.HOUR: return { start: df.startOfHour(date), end: df.startOfHour(df.addHours(date, 1)) };
+				case PERIOD.DAY: return { start: df.startOfDay(date), end: df.startOfDay(df.addDays(date, 1)) };
+				case PERIOD.WEEK: return { start: df.startOfWeek(date, this.dfOptions), end: df.startOfWeek(df.addWeeks(date, 1), this.dfOptions) };
+				case PERIOD.MONTH: return { start: df.startOfMonth(date), end: df.startOfMonth(df.addMonths(date, 1)) };
+				case PERIOD.YEAR: return { start: df.startOfYear(date), end: df.startOfYear(df.addYears(date, 1)) };
 			}
 		},
 
@@ -771,13 +804,13 @@ module.exports = {
 			if ( 'nav' in ev.dataAttr ) {
 				
 				if ( ev.eventType === 'tap' )
-					this.move(ev.dataAttr.nav);
+					this.current = this.dateAdd(this.current, this.view, ev.dataAttr.nav);
 				
 				if ( ev.eventType === 'over' && ev.pointerActive ) {
 
 					var startMove = function(timeout) {
 
-						this.move(ev.dataAttr.nav);
+						this.current = this.dateAdd(this.current, this.view, ev.dataAttr.nav);
 						this.moveInterval = setTimeout(function() {
 							
 							startMove(Math.max(timeout * 0.8, 250));
@@ -794,44 +827,17 @@ module.exports = {
 				}
 			}
 
-
 			if ( 'item' in ev.dataAttr ) {
 				
 				var value = JSON.parse(ev.dataAttr.item);
-				var date = df.parse(value[0]*10000); // 10000: currently, min resolution is "minute"
 				ev.type = value[1];
-				ev.range = this.getItemRange(date, ev.type);
+				ev.range = this.getItemRange(df.parse(value[0]*10000), ev.type); // 10000: currently, min resolution is "minute"
 				
-				if ( !ev.keyActive && ev.eventType === 'tap' ) {
-					
-					switch ( ev.type ) {
-						case 'month':
-							this.view = VIEW.MONTH;
-							this.current = ev.range.start;
-							return;
-						case 'year':
-							this.view = VIEW.YEAR;
-							this.current = ev.range.start;
-							return;
-					}
-				}
-				
-				if ( !ev.keyActive && ev.eventType === 'press' ) {
-					
-					switch ( ev.type ) {
-						case 'hour':
-							this.view = VIEW.HOUR;
-							this.current = ev.range.start;
-							return;
-						case 'day':
-							this.view = VIEW.DAY;
-							this.current = ev.range.start;
-							return;
-						case 'week':
-							this.view = VIEW.WEEK;
-							this.current = ev.range.start;
-							return;
-					}
+				if ( !ev.keyActive && ((ev.eventType === 'tap' && ev.type >= PERIOD.MONTH) || (ev.eventType === 'press' && ev.type < PERIOD.MONTH && ev.type > PERIOD.MINUTE )) ) {
+						
+					this.view = ev.type;
+					this.current = ev.range.start;
+					return;
 				}
 			}
 			
@@ -841,7 +847,7 @@ module.exports = {
 	created: function() {
 		
 		this.df = df;
-		this.VIEW = VIEW;
+		this.PERIOD = PERIOD;
 	}
 }
 
