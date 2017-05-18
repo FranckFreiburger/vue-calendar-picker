@@ -37,6 +37,7 @@ npm install --save vue-calendar-picker
 * localized (see [supported locale list](https://github.com/date-fns/date-fns/tree/master/src/locale))
 * autodetect the first day of the week
 * animated (zoom & slide)
+* multiple calendar views (side-by-side)
 * display one-time events and date/time period
 * date/time period selection
 * touch screen support
