@@ -1,10 +1,11 @@
 <template>
-	<div style="user-select: none">
+	<div style="user-select: none; display: inline-block">
 		<calendar-events
 			v-for="i in useTwoCalendars? 2 : 1"
 			:key="i"
 			:locale="locale"
 			:compact="compact"
+			:view-count="viewCount"
 			:initial-view="initialView"
 			:initial-current="initialCurrent"
 			:selection="selection"
@@ -29,6 +30,7 @@ module.exports = {
 	props: {
 		locale: {},
 		compact: {},
+		viewCount: {},
 		initialView: {},
 		initialCurrent: {},
 		events: {},

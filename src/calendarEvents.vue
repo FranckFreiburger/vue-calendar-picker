@@ -2,6 +2,7 @@
 	<calendar
 		:locale="locale"
 		:compact="compact"
+		:view-count="viewCount"
 		:initial-view="initialView"
 		:initial-current="initialCurrent"
 		:item-class="thisItemClass"
@@ -10,19 +11,19 @@
 		:selection="selection"
 		@action="action"
 	>
-		<template scope="p">
+		<template scope="scope">
 			<div class="events">
 				<div
 					class="eventRange"
 					v-for="(event, index) in events"
-					v-if="!df.isEqual(event.start, event.end) && df.areRangesOverlapping(event.start, event.end, p.itemRange.start, p.itemRange.end)"
-					:style="[ { backgroundColor: event.color }, eventStyle(event, p.itemRange, p.layout) ]"
+					v-if="!df.isEqual(event.start, event.end) && df.areRangesOverlapping(event.start, event.end, scope.itemRange.start, scope.itemRange.end)"
+					:style="[ { backgroundColor: event.color }, eventStyle(event, scope.itemRange, scope.layout) ]"
 					:data-event="index"
 				></div>
 				<div
 					class="eventAt"
 					v-for="(event, index) in events"
-					v-if="df.isEqual(event.start, event.end) && df.isWithinRange(event.start, p.itemRange.start, p.itemRange.end) && !df.isEqual(event.end, p.itemRange.end)"
+					v-if="df.isEqual(event.start, event.end) && df.isWithinRange(event.start, scope.itemRange.start, scope.itemRange.end) && !df.isEqual(event.end, scope.itemRange.end)"
 					:style="{ backgroundColor: event.color }"
 					:data-event="index"
 				></div>
@@ -53,13 +54,13 @@
 
 /* horizontal layout */
 
-.calendar .timeHorizontal .events {
+.calendar .horizontalLayout .events {
 	width: 100%;
 	vertical-align: top;
 	text-align: center;
 }
 
-.calendar .timeHorizontal .eventRange {
+.calendar .horizontalLayout .eventRange {
 	position: relative;
 	display: block;
 	margin: 2px 0;
@@ -68,18 +69,18 @@
 	height: 2px;
 }
 
-.calendar .timeHorizontal .eventAt {
+.calendar .horizontalLayout .eventAt {
 	vertical-align: top;
 }
 
 
 /* vertical layout */
 
-.calendar .timeVertical .events {
+.calendar .verticalLayout .events {
 	height: 100%;
 }
 
-.calendar .timeVertical .eventRange {
+.calendar .verticalLayout .eventRange {
 	position: relative;
 	margin: 0 2px;
 	width: 2px;
@@ -88,7 +89,7 @@
 	vertical-align: top;
 }
 
-.calendar .timeVertical .eventAt {
+.calendar .verticalLayout .eventAt {
 	vertical-align: middle;
 }
 
@@ -119,6 +120,7 @@ module.exports = {
 	props: {
 		locale: {},
 		compact: {},
+		viewCount: {},
 		initialView: {},
 		initialCurrent: {},
 		selection: {
@@ -139,7 +141,7 @@ module.exports = {
 	methods: {
 
 		thisItemClass: function(range, type) {
-			
+
 			var classlist = [this.itemClass(range, type)];
 
 			var start = this.selection.start;
