@@ -81,6 +81,14 @@
 	text-align: center;	
 }
 
+
+.calendar .header > span {
+	cursor: pointer;
+	padding: 1em;
+}
+
+
+
 .calendar.compact .header {
 	height: 1.25em;
 	padding-top: 0.25em;
@@ -101,16 +109,6 @@
 	right: 0;
 	text-align: center;
 }
-
-/*
-.calendar .nav > .header > span {
-	box-sizing: border-box;
-	display: inline-block;
-	height: 100%;
-	padding: 0.5em;
-	cursor: pointer;
-}
-*/
 
 .calendar .nav .prev,
 .calendar .nav .next {
@@ -160,6 +158,7 @@
 	height: 100%;
 	width: 100%;
 	overflow: hidden;
+	white-space: nowrap;
 }
 
 .calendar .view {
@@ -189,35 +188,35 @@
 }
 
 
-
-.calendar .forwardScale-leave-to,
-.calendar .reverseScale-enter {
+.calendar .reverseScale-leave-to,
+.calendar .forwardScale-enter {
 	transform: scale(.5);
 	opacity: 0;
 }
 
-.calendar .forwardScale-enter,
-.calendar .reverseScale-leave-to {
+.calendar .reverseScale-enter,
+.calendar .forwardScale-leave-to {
 	transform: scale(1.5);
 	opacity: 0;
 }
 
-.calendar .forwardScale-leave-active,
-.calendar .reverseScale-leave-active {
+.calendar .reverseScale-leave-active,
+.calendar .forwardScale-leave-active {
 	position: absolute;
 }
 
-.calendar .forwardScale-leave-active {
-	transform-origin: inherit;
+
+.calendar.multiView .view {
+	border-left: 1px dotted lightgray;
+}
+
+.calendar.multiView .view:first-child {
+	border-left: none;
 }
 
 
 /*
-.calendar.multiView .view {
-	border-left: 1px solid silver;
-}
-
-.calendar.multiView .view.forwardScale-leave-to,
+.calendar.multiView .view.reverseScale-leave-to,
 .calendar.multiView .view.forwardSlide-leave-to {
 	border-right: 1px solid silver;
 }
@@ -311,7 +310,7 @@ module.exports = {
 		view: function(val, prev) {
 			
 			if ( val !== prev )
-				this.animation = val > prev ? 'forwardScale' : 'reverseScale';
+				this.animation = val > prev ? 'reverseScale' : 'forwardScale';
 		},
 	},
 	
