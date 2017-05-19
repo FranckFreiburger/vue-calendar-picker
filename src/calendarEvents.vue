@@ -15,14 +15,14 @@
 			<div class="events">
 				<div
 					class="eventRange"
-					v-for="(event, index) in events"
+					v-for="(event, index) in sortedEvents"
 					v-if="!df.isEqual(event.start, event.end) && df.areRangesOverlapping(event.start, event.end, scope.itemRange.start, scope.itemRange.end)"
 					:style="[ { backgroundColor: event.color }, eventStyle(event, scope.itemRange, scope.layout) ]"
 					:data-event="index"
 				></div>
 				<div
 					class="eventAt"
-					v-for="(event, index) in events"
+					v-for="(event, index) in sortedEvents"
 					v-if="df.isEqual(event.start, event.end) && df.isWithinRange(event.start, scope.itemRange.start, scope.itemRange.end) && !df.isEqual(event.end, scope.itemRange.end)"
 					:style="{ backgroundColor: event.color }"
 					:data-event="index"
@@ -137,6 +137,16 @@ module.exports = {
 			type: Array,
 			default: []
 		},
+	},
+	computed: {
+		
+		sortedEvents: function() {
+			
+			return this.events.slice().sort(function(b, a) {
+				
+				return (a.end - a.start) - (b.end - b.start);
+			})
+		}
 	},
 	methods: {
 
