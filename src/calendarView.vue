@@ -1,5 +1,5 @@
 <template>
-	<div class="view" v-onpointer="viewEvent">
+	<div class="view">
 		<slot name="header" :view="view" :current="current"></slot>
 		<div class="content" :class="[ PERIOD[view]+'View', viewLayout[view]+'Layout' ]">
 
@@ -270,7 +270,7 @@ module.exports = {
 	mixins: [mixin],
 	props: {
 		current: {
-			type: [Date, String, Number],
+			type: Date,
 			required: true,
 		},
 		view: {
@@ -309,21 +309,7 @@ module.exports = {
 		visibleWeeksCount: function(date) {
 
 			return Math.ceil((df.getDaysInMonth(date) + df.getDay(df.startOfMonth(date))) / 7);
-		},
-
-		viewEvent: function(ev) {
-			
-			ev.dataAttr = findDataAttr(ev.eventTarget, this.$el);
-
-			if ( 'item' in ev.dataAttr ) {
-				
-				var value = JSON.parse(ev.dataAttr.item);
-				ev.type = value[1];
-				ev.range = this.getItemRange(df.parse(value[0]*10000), ev.type); // 10000: currently, min resolution is "minute"
-			}
-			
-			this.$emit('action', ev);
-		},		
+		}
 	}
 }
 </script>

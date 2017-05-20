@@ -1,6 +1,6 @@
 <template>
-	<div class="calendar" :class="{ compact: compact, multiView: viewCount > 1 }">
-		<div class="nav" v-onpointer="navEvent">
+	<div class="calendar" :class="{ compact: compact, multiView: viewCount > 1 }" v-onpointer="pointerEvent">
+		<div class="nav">
 			<span class="prev" v-data:nav="-1"></span>
 			<calendar-header v-if="viewCount === 1"></calendar-header>
 			<span class="next" v-data:nav="1"></span>
@@ -16,7 +16,6 @@
 				:view="view"
 				:current="current"
 				:item-class="itemClass"
-				@action="action"
 			>
 				<template slot="header" scope="scope">
 					<calendar-header v-if="viewCount > 1"></calendar-header>
@@ -84,7 +83,7 @@
 
 .calendar .header > span {
 	cursor: pointer;
-	padding: 1em;
+	padding: 0.5em;
 }
 
 
@@ -118,6 +117,7 @@
 	font-size: 150%;
 	padding: 0.3em 1em 0 1em;
 	font-weight: bold;
+	cursor: pointer;
 }
 
 .calendar .nav .prev {
@@ -277,6 +277,10 @@ module.exports = {
 			type: [Date, String, Number],
 			default: function() {
 				return new Date
+			},
+			validator: function(value) {
+				
+				return df.isValid(df.parse(value));
 			}
 		},
 		viewCount: {
@@ -297,7 +301,7 @@ module.exports = {
 		return {
 			animation: '',
 			view: this.initialView,
-			current: this.initialCurrent,
+			current: df.parse(this.initialCurrent),
 		}
 	},
 
@@ -329,7 +333,7 @@ module.exports = {
 			return String(this.view) + String(df.getTime(current));
 		},
 
-		navEvent: function(ev) {
+		pointerEvent: function(ev) {
 
 			ev.dataAttr = findDataAttr(ev.eventTarget, this.$el);
 			
@@ -369,12 +373,15 @@ module.exports = {
 				}
 			}
 			
-			this.action(ev);
-		},
-
-		action: function(ev) {
+			if ( 'item' in ev.dataAttr ) {
+				
+				var value = JSON.parse(ev.dataAttr.item);
+				ev.type = value[1];
+				ev.range = this.getItemRange(df.parse(value[0]*10000), ev.type); // 10000: currently, min resolution is "minute"
+			}
 			
-			if ( ev.dataAttr.view && ev.eventType === 'tap' ) {
+
+			if ( 'view' in ev.dataAttr && ev.eventType === 'tap' ) {
 					
 				this.view = Number(ev.dataAttr.view);
 				return;
