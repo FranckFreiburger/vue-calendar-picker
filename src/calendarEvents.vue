@@ -104,6 +104,28 @@
 	background-color: #def;
 }
 
+
+.calendar .horizontalLayout .selectionStart {
+	border-top-left-radius: 0.5em;
+	border-bottom-left-radius: 0.5em;
+}
+
+.calendar .horizontalLayout .selectionEnd {
+	border-top-right-radius: 0.5em;
+	border-bottom-right-radius: 0.5em;
+}
+
+.calendar .verticalLayout .selectionStart {
+	border-top-left-radius: 0.5em;
+	border-top-right-radius: 0.5em;
+}
+
+.calendar .verticalLayout .selectionEnd {
+	border-bottom-left-radius: 0.5em;
+	border-bottom-right-radius: 0.5em;
+}
+
+
 </style>
 
 <script>
@@ -160,11 +182,29 @@ module.exports = {
 			var end = df.max(start, end);
 			
 			
-			if ( !(df.isAfter(start, range.start) || df.isBefore(end, range.end)) )
-				classlist.push('selection'+2);
-			else
-			if ( df.areRangesOverlapping(start, end, range.start, range.end) )
-				classlist.push('selection'+1);
+			if ( !(df.isAfter(start, range.start) || df.isBefore(end, range.end)) ) {
+				
+				classlist.push('selection2');
+				
+				if ( df.isEqual(start, range.start) )
+					classlist.push('selectionStart');
+				
+				if ( df.isEqual(end, range.end) )
+					classlist.push('selectionEnd');	
+				
+			} else
+			if ( df.areRangesOverlapping(start, end, range.start, range.end) ) {
+				
+				classlist.push('selection1');
+				
+				if ( df.isWithinRange(start, range.start, range.end) )
+					classlist.push('selectionStart');
+
+				if ( df.isWithinRange(end, range.start, range.end) )
+					classlist.push('selectionEnd');
+			}
+			
+			
 			
 			return classlist;
 		},
