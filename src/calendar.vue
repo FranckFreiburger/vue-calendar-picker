@@ -1,9 +1,9 @@
 <template>
 	<div class="calendar" :class="{ compact: compact, multiView: viewCount > 1 }" v-onpointer="pointerEvent">
 		<div class="nav">
-			<span class="prev" v-data:nav="-1"></span>
+			<span class="prev" data-nav="-1"></span>
 			<calendar-header v-if="viewCount === 1"></calendar-header>
-			<span class="next" v-data:nav="1"></span>
+			<span class="next" data-nav="1"></span>
 		</div>
 		<transition-group :name="animation" @after-enter="animation = ''" class="viewContainer">
 			<calendar-view
@@ -336,7 +336,7 @@ module.exports = {
 		pointerEvent: function(ev) {
 
 			ev.dataAttr = findDataAttr(ev.eventTarget, this.$el);
-			
+
 			if ( ev.eventType === 'over' ) {
 				
 				if ( isEq(this.prevOverDataAttr, ev.dataAttr) )
@@ -349,27 +349,31 @@ module.exports = {
 
 			if ( 'nav' in ev.dataAttr ) {
 				
-				if ( ev.eventType === 'tap' )
-					this.current = this.dateAdd(this.current, this.view, ev.dataAttr.nav);
+				var nav = Number(ev.dataAttr.nav);
 				
+				if ( ev.eventType === 'tap' )
+					this.current = this.dateAdd(this.current, this.view, nav);
+
 				if ( ev.eventType === 'over' && ev.pointerActive ) {
 
 					var startMove = function(timeout) {
 
-						this.current = this.dateAdd(this.current, this.view, ev.dataAttr.nav);
-						this.moveInterval = setTimeout(function() {
+						this.current = this.dateAdd(this.current, this.view, nav);
+						this._moveInterval = setTimeout(function() {
 							
 							startMove(Math.max(timeout * 0.8, 250));
 						}, timeout);
 					}.bind(this);
+					
 					startMove(750);
 				}
+
 			} else {
 				
-				if ( this.moveInterval !== undefined ) {
+				if ( this._moveInterval !== undefined ) {
 					
-					clearInterval(this.moveInterval);
-					this.moveInterval = undefined;
+					clearInterval(this._moveInterval);
+					this._moveInterval = undefined;
 				}
 			}
 			

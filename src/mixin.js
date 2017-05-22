@@ -4,134 +4,22 @@ var df = require('date-fns'); // https://date-fns.org
 
 var PERIOD = require('./period.js');
 
+var pointerEventDirective = require('./pointerEventDirective.js');
 
-function onpointer() {
-	
-	function hasKeyActive(ev) {
-		
-		return ev.shiftKey || ev.ctrlKey || ev.altKey || ev.metaKey;
-	}
-
-
-	function touchStartHandler(cx, ev) {
-
-		cx.callback({ eventType:'down', eventTarget:ev.target, pointerActive:true, keyActive:false});
-		
-		cx._pressTimeout = setTimeout(function() {
-		
-			cx.callback({ eventType:'press', eventTarget:ev.target, pointerActive:true, keyActive:false});
-		}, 1000);
-	}
-	
-	function touchEndHandler(cx, ev) {
-
-		if ( cx._pressTimeout !== undefined ) {
-			
-			clearTimeout(cx._pressTimeout);
-			cx._pressTimeout = undefined;
-		}
-
-		cx.callback({ eventType:'up', eventTarget:ev.target, pointerActive:false, keyActive:false});
-	}
-
-	function touchMoveHandler(cx, ev) {
-		
-		if ( cx._pressTimeout !== undefined ) {
-			
-			clearTimeout(cx._pressTimeout);
-			cx._pressTimeout = undefined;
-		}
-		
-		ev.preventDefault();
-		var eventTarget = document.elementFromPoint(ev.changedTouches[0].clientX, ev.changedTouches[0].clientY);
-		cx.callback({ eventType:'over', eventTarget:eventTarget, pointerActive:true, keyActive:false});
-	}
-	
-	function clickHandler(cx, ev) {
-		
-		cx.callback({ eventType:'tap', eventTarget:ev.target, pointerActive:false, keyActive:hasKeyActive(ev)});
-	}
-	
-	function dblclickHandler(cx, ev) {
-		
-		cx.callback({ eventType:'press', eventTarget:ev.target, pointerActive:false, keyActive:hasKeyActive(ev)});
-	}
-	
-	function mouseOverHandler(cx, ev) {
-
-		cx.callback({ eventType:'over', eventTarget:ev.target, pointerActive:cx.buttonState, keyActive:hasKeyActive(ev)});
-	}
-	
-	function mouseDownHandler(cx, ev) {
-
-		cx.callback({ eventType:'down', eventTarget:ev.target, pointerActive:true, keyActive:hasKeyActive(ev)});
-	}
-	
-	function mouseUpHandler(cx, ev) {
-
-		cx.callback({ eventType:'up', eventTarget:ev.target, pointerActive:false, keyActive:hasKeyActive(ev)});
-	}
-	
-	
-	function eventListener(el, eventName, handler) {
-		
-		el.addEventListener(eventName, handler);
-		return el.removeEventListener.bind(el, eventName, handler);
-	}
-
-	return {
-		bind: function(el, binding, vnode, oldVnode) {
-			
-			var cx = {
-				el: el,
-				callback: binding.value,
-				offEvent: []
-			}
-			
-			cx.offEvent.push( eventListener(el, 'click', clickHandler.bind(this, cx)) );
-			cx.offEvent.push( eventListener(el, 'dblclick', dblclickHandler.bind(this, cx)) );
-			cx.offEvent.push( eventListener(el, 'mouseover', mouseOverHandler.bind(this, cx)) );
-			cx.offEvent.push( eventListener(el, 'mousedown', mouseDownHandler.bind(this, cx)) );
-			cx.offEvent.push( eventListener(el, 'mouseup', mouseUpHandler.bind(this, cx)) );
-
-			// IE9 does not update ev.buttons on mouseover event
-			cx.offEvent.push( eventListener(document, 'mousedown', function(ev) { cx.buttonState = true } ) );
-			cx.offEvent.push( eventListener(document, 'mouseup', function(ev) { cx.buttonState = false } ) );
-
-			// touch screen
-			cx.offEvent.push( eventListener(el, 'touchstart', touchStartHandler.bind(this, cx)) );
-			cx.offEvent.push( eventListener(el, 'touchmove', touchMoveHandler.bind(this, cx)) );
-			cx.offEvent.push( eventListener(el, 'touchend', touchEndHandler.bind(this, cx)) );
-			
-			// for IE9
-			cx.offEvent.push( eventListener(el, 'selectstart', function(ev) { ev.preventDefault() } ) );
-
-			el._onpointerCx = cx;
-		},
-		unbind: function(el, binding, vnode, oldVnode) {
-			
-			var cx = el._onpointerCx;
-			while ( cx.offEvent.length !== 0 )
-				cx.offEvent.pop()();
-			el._onpointerCx = null;
-		}
-	}
-}
 
 function data(el, binding) {
 
 	if ( isEq(binding.value, binding.oldValue) )
 		return;
-	// IE[9, 10] does not reflect dataset into dom attributes.
-	//el.dataset[binding.arg] = binding.modifiers.json === true ? JSON.stringify(binding.value) : String(binding.value);
-	el.setAttribute('data-'+binding.arg, binding.modifiers.json === true ? JSON.stringify(binding.value) : String(binding.value));
+	// use setAttribute instead of dataset because IE[9, 10] does not reflect dataset into dom attributes.
+	el.setAttribute('data-'+binding.arg, JSON.stringify(binding.value));
 }
 
 
 module.exports = {
 	directives: {
 		data: data,
-		onpointer: onpointer(),
+		onpointer: pointerEventDirective(),
 	},
 	
 	props: {

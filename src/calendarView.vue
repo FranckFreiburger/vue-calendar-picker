@@ -8,7 +8,7 @@
 					<template v-for="x in 4">
 						<span
 							v-for="range in [getItemRange(df.setMinutes(current, (y-1) + (x-1)*15 ), PERIOD.MINUTE)]"
-							v-data:item.json="[+range.start/10000, PERIOD.MINUTE]"
+							v-data:item="[+range.start/10000, PERIOD.MINUTE]"
 							:class="[ { today: df.isSameMinute(today, range.start) }, itemClass(range, PERIOD.MINUTE) ]"
 						>
 							<div class="cellHead">{{df.format(range.start, 'mm')}}</div>
@@ -23,7 +23,7 @@
 					<template v-for="x in 2">
 						<span
 							v-for="range in [getItemRange(df.setHours(current, (y-1) + (x-1)*12 ), PERIOD.HOUR)]"
-							v-data:item.json="[+range.start/10000, PERIOD.HOUR]"
+							v-data:item="[+range.start/10000, PERIOD.HOUR]"
 							:class="[ { today: df.isSameHour(today, range.start) }, itemClass(range, PERIOD.HOUR) ]"
 						>
 							<div class="cellHead">{{df.format(range.start, 'HH')}}<sup>h</sup></div>
@@ -39,7 +39,7 @@
 					<template v-for="x in 7">
 						<span
 							v-for="arg in [df.addDays(df.startOfWeek(current, dfOptions), x-1)]"
-							v-data:item.json="[+arg/10000, PERIOD.DAY]"
+							v-data:item="[+arg/10000, PERIOD.DAY]"
 							:class="[ { today: df.isSameDay(today, arg) } ]"
 						>{{format(arg, 'dd')}}<sub>{{df.getDate(arg)}}</sub></span>
 					</template>
@@ -49,7 +49,7 @@
 					<template v-for="x in 7">
 						<span
 							v-for="range in [getItemRange(df.addHours(df.addDays(df.startOfWeek(current, dfOptions), x-1), y-1), PERIOD.HOUR)]"
-							v-data:item.json="[+range.start/10000, PERIOD.HOUR]"
+							v-data:item="[+range.start/10000, PERIOD.HOUR]"
 							:class="[ { thisMonth: df.isSameMonth(current, range.start) }, itemClass(range, PERIOD.HOUR) ]"
 						>
 							<slot :item-range="range" :layout="viewLayout[view]"></slot>
@@ -67,14 +67,14 @@
 					<template v-for="week in [df.addDays(firstDayOfMonth(current), (y-1) * 7)]">
 						<span
 							v-if="!compact && (y <= visibleWeeksCount(current) || showOverlappingDays)"
-							v-data:item.json="[+week/10000, PERIOD.WEEK]"
+							v-data:item="[+week/10000, PERIOD.WEEK]"
 							v-text="df.getISOWeek(week)"
 						></span>
 					</template>
 					<template v-for="x in 7">
 						<span v-if="showOverlappingDays || df.isSameMonth(current, range.start)"
 							v-for="range in [getItemRange(df.addDays(firstDayOfMonth(current), (y-1) * 7 + (x-1)), PERIOD.DAY)]"
-							v-data:item.json="[+range.start/10000, PERIOD.DAY]"
+							v-data:item="[+range.start/10000, PERIOD.DAY]"
 							:class="[ { today: df.isSameDay(today, range.start), notThisMonth: !df.isSameMonth(current, range.start) }, itemClass(range, PERIOD.DAY) ]"
 						>
 							<div class="cellHead" v-text="df.getDate(range.start)"></div>
@@ -90,7 +90,7 @@
 					<template v-for="x in 4">
 						<span
 							v-for="range in [getItemRange(df.setMonth(current, (y-1)*4 + (x-1)), PERIOD.MONTH)]"
-							v-data:item.json="[+range.start/10000, PERIOD.MONTH]"
+							v-data:item="[+range.start/10000, PERIOD.MONTH]"
 							:class="[ { today: df.isSameMonth(today, range.start) }, itemClass(range, PERIOD.MONTH) ]"
 						>
 							<div class="cellHead" v-text="format(range.start, compact ? 'MMM' : 'MMMM')"></div>
@@ -105,7 +105,7 @@
 					<template v-for="x in 4">
 						<span
 							v-for="range in [getItemRange(df.addYears(current, (y-1)*4 + (x-1) - 9), PERIOD.YEAR)]"
-							v-data:item.json="[+range.start/10000, PERIOD.YEAR]"
+							v-data:item="[+range.start/10000, PERIOD.YEAR]"
 							:class="[ { today: df.isSameYear(today, range.start) }, itemClass(range, PERIOD.YEAR) ]"
 						>
 							<div class="cellHead" v-text="df.getYear(range.start)"></div>
