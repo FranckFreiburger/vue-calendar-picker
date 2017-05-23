@@ -183,7 +183,8 @@
 	transform: translateX(0);
 }
 
-.calendar .reverseSlide-leave-active {
+.calendar .reverseSlide-leave-active,
+.calendar .forwardSlide-leave-active {
 	position: absolute;
 }
 
