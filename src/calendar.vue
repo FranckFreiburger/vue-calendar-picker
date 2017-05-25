@@ -11,6 +11,7 @@
 				:key="viewId(current)"
 				:style="{ width: (100/viewCount)+'%' }"
 				
+				:locale="locale"
 				:compact="compact"
 				:show-overlapping-days="showOverlappingDays !== undefined ? showOverlappingDays : viewCount === 1"
 				:view="view"
