@@ -157,7 +157,9 @@ module.exports = {
 		},
 		events: {
 			type: Array,
-			default: []
+			default: function() {
+				return [];
+			}
 		},
 	},
 	computed: {
