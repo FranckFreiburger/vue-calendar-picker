@@ -302,10 +302,19 @@ export default {
 	},
 
 	watch: {
-		current: function(val, prev) {
+		initialCurrent: function(val, prev) {
 			
-			if ( !df.isEqual(val, prev) )
+			this.current = df.parse(val);
+		},
+		current: function(val, prev) {
+
+			var valRange = this.getItemRange(val, this.view);
+			var prevRange = this.getItemRange(prev, this.view);
+
+			if ( !df.isEqual(valRange.start, prevRange.start) )
 				this.animation = df.isAfter(val, prev) ? 'forwardSlide' : 'reverseSlide';
+			else
+				this.animation = '';
 		},
 		view: function(val, prev) {
 			
