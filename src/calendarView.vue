@@ -308,7 +308,10 @@ export default {
 
 		visibleWeeksCount: function(date) {
 
-			return Math.ceil((df.getDaysInMonth(date) + df.getDay(df.startOfMonth(date))) / 7);
+			const startOfMonth = df.startOfMonth(date);
+			const day = df.getDay(startOfMonth);
+
+			return Math.ceil((df.getDaysInMonth(date) + (7 + day - this.firstDayOfTheWeek) % 7) / 7);
 		}
 	}
 }
