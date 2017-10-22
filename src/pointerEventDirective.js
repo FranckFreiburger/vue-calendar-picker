@@ -1,14 +1,18 @@
-var docComputedStyles = window.getComputedStyle(window.document.documentElement);
-var hasUserSelect = 'userSelect' in docComputedStyles || 'MozUserSelect' in docComputedStyles || 'OUserSelect' in docComputedStyles || 'msUserSelect' in docComputedStyles || 'WebkitUserSelect' in docComputedStyles;
-var hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints;
-var hasMouse = true;
+export default function() {
 
-var uaName = navigator.appVersion;
-var pos = uaName.indexOf('MSIE ');
-var ieVer = pos !== -1 ? parseFloat(uaName.substr(pos+5, uaName.indexOf(';', pos))) : 0;
+	if ( process.env.VUE_ENV === 'server' ) {
 
+		return {}
+	}
 
-module.exports = function() {
+	var docComputedStyles = window.getComputedStyle(window.document.documentElement);
+	var hasUserSelect = 'userSelect' in docComputedStyles || 'MozUserSelect' in docComputedStyles || 'OUserSelect' in docComputedStyles || 'msUserSelect' in docComputedStyles || 'WebkitUserSelect' in docComputedStyles;
+	var hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints;
+	var hasMouse = true;
+
+	var uaName = navigator.appVersion;
+	var pos = uaName.indexOf('MSIE ');
+	var ieVer = pos !== -1 ? parseFloat(uaName.substr(pos+5, uaName.indexOf(';', pos))) : 0;
 	
 	function hasKeyActive(cx, ev) {
 		

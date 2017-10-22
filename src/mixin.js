@@ -1,10 +1,7 @@
-var isEq = require('./isEq.js');
-
-var df = require('date-fns'); // https://date-fns.org
-
-var PERIOD = require('./period.js');
-
-var pointerEventDirective = require('./pointerEventDirective.js');
+import isEq from './isEq.js';
+import df from 'date-fns';
+import PERIOD from './period.js';
+import pointerEventDirective from './pointerEventDirective.js';
 
 
 function data(el, binding) {
@@ -15,8 +12,14 @@ function data(el, binding) {
 	el.setAttribute('data-'+binding.arg, JSON.stringify(binding.value));
 }
 
+function normalizeLocale(locale) {
 
-module.exports = {
+	if ( locale.length === 2 )
+		return locale+'-'+locale;
+	return locale;
+}
+
+export default {
 	directives: {
 		data: data,
 		onpointer: pointerEventDirective(),
@@ -25,11 +28,12 @@ module.exports = {
 	props: {
 		locale: {
 			type: String,
-			default: (navigator.language || navigator.userLanguage).substr(0,2).toUpperCase(),
-			validator: function(value) {
-				
-				return value === value.toUpperCase();
-			}
+			default: process.env.VUE_ENV === 'server' ? '' : normalizeLocale(navigator.language || navigator.userLanguage),
+//			validator: function(value) {
+//				
+//				return value === value.toUpperCase();
+//			},
+			required: process.env.VUE_ENV === 'server'
 		},
 		compact: {
 			type: Boolean,
@@ -45,16 +49,19 @@ module.exports = {
 	computed: {
 		dateFnsLocale: function() {
 			
-			return require('date-fns/locale/'+this.locale.toLowerCase()+'/index.js');
+			const lang = this.locale.substr(0,2).toLowerCase();
+			return require('date-fns/locale/'+lang+'/index.js');
 		},
 
 		firstDayOfTheWeek: function() {
+
+			const country = this.locale.substr(3,2).toUpperCase();
 					
-			if (' GB AG AR AS AU BR BS BT BW BZ CA CN CO DM DO ET GT GU HK HN ID IE IL IN JM JP KE KH KR LA MH MM MO MT MX MZ NI NP NZ PA PE PH PK PR PY SA SG SV TH TN TT TW UM US VE VI WS YE ZA ZW '.indexOf(' '+this.locale+' ') !== -1 )
+			if (' GB AG AR AS AU BR BS BT BW BZ CA CN CO DM DO ET GT GU HK HN ID IE IL IN JM JP KE KH KR LA MH MM MO MT MX MZ NI NP NZ PA PE PH PK PR PY SA SG SV TH TN TT TW UM US VE VI WS YE ZA ZW '.indexOf(' '+country+' ') !== -1 )
 				return 0; // sun
-			if (' AE AF BH DJ DZ EG IQ IR JO KW LY MA OM QA SD SY '.indexOf(' '+this.locale+' ') !== -1 )
+			if (' AE AF BH DJ DZ EG IQ IR JO KW LY MA OM QA SD SY '.indexOf(' '+country+' ') !== -1 )
 				return 6; // sat
-			if (' BD MV '.indexOf(' '+this.locale+' ') !== -1 )
+			if (' BD MV '.indexOf(' '+country+' ') !== -1 )
 				return 5; // fri
 			return 1; // mon
 		},

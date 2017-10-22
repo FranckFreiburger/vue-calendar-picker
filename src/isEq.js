@@ -1,4 +1,4 @@
-module.exports = function isEq(val1, val2) {
+export default function isEq(val1, val2) {
 	
 	if ( val1 === val2 )
 		return true;

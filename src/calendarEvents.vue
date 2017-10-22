@@ -129,13 +129,11 @@
 </style>
 
 <script>
-"use strict";
 
-var df = require('date-fns'); // https://date-fns.org
+import df from 'date-fns'; // https://date-fns.org
+import calendar from './calendar.vue';
 
-var calendar = require('./calendar.vue');
-
-module.exports = {
+export default {
 	components: {
 		calendar: calendar,
 	},

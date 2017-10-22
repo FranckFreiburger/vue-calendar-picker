@@ -245,21 +245,15 @@
 <script>
 "use strict";
 
-var calendarView = require('./calendarView.vue');
-var calendarHeader = require('./calendarHeader.vue');
+import calendarView from './calendarView.vue';
+import calendarHeader from './calendarHeader.vue';
+import df from 'date-fns';
+import findDataAttr from './findDataAttr.js';
+import isEq from './isEq.js';
+import PERIOD from './period.js';
+import mixin from './mixin.js';
 
-var df = require('date-fns'); // https://date-fns.org
-
-
-var findDataAttr = require('./findDataAttr.js');
-
-var isEq = require('./isEq.js');
-
-var PERIOD = require('./period.js');
-
-var mixin = require('./mixin.js');
-
-module.exports = {
+export default {
 	mixins: [mixin],
 	components: {
 		calendarView: calendarView,

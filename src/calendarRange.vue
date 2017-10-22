@@ -17,13 +17,11 @@
 </template>
 
 <script>
-"use strict";
 
-var df = require('date-fns'); // https://date-fns.org
+import df from 'date-fns';
+import calendarEvents from './calendarEvents.vue';
 
-var calendarEvents = require('./calendarEvents.vue');
-
-module.exports = {
+export default {
 	components: {
 		calendarEvents: calendarEvents,
 	},

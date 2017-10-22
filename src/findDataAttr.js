@@ -1,4 +1,4 @@
-module.exports = function(elt, rootElt) {
+export default function(elt, rootElt) {
 	
 	var dataAttrMap = {};
 	for ( ; elt !== rootElt && elt !== null; elt = elt.parentNode )

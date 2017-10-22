@@ -256,17 +256,13 @@
 </style>
 
 <script>
-"use strict";
 
-var df = require('date-fns'); // https://date-fns.org
+import df from 'date-fns';
+import PERIOD from './period.js';
+import mixin from './mixin.js';
+import findDataAttr from './findDataAttr.js';
 
-var PERIOD = require('./period.js');
-
-var mixin = require('./mixin.js');
-
-var findDataAttr = require('./findDataAttr.js');
-
-module.exports = {
+export default {
 	mixins: [mixin],
 	props: {
 		current: {

@@ -1,6 +1,13 @@
-module.exports = {
-	calendarView: require('./calendarView.vue'),
-	calendar: require('./calendar.vue'),
-	calendarRange: require('./calendarRange.vue'),
-	calendarEvents: require('./calendarEvents.vue'),
+import calendarView from './calendarView.vue';
+import calendar from './calendar.vue';
+import calendarRange from './calendarRange.vue';
+import calendarEvents from './calendarEvents.vue';
+import df from 'date-fns';
+
+export {
+	calendarView,
+	calendar,
+	calendarRange,
+	calendarEvents,
+	df
 }
