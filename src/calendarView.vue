@@ -64,7 +64,7 @@
 					<span v-for="n in 7" v-text="format(df.setDay(current, firstDayOfTheWeek+n-1), compact ? 'dd' : 'ddd')"></span>
 				</div>
 				<div v-for="y in compact ? visibleWeeksCount(current) : 6">
-					<template v-for="week in [df.addDays(firstDayOfMonth(current), (y-1) * 7)]">
+					<template v-for="week in [df.addDays(firstVisibleDayOfMonthView(current), (y-1) * 7)]">
 						<span
 							v-if="!compact && (y <= visibleWeeksCount(current) || showOverlappingDays)"
 							v-data:item="[+week/10000, PERIOD.WEEK]"
@@ -72,8 +72,9 @@
 						></span>
 					</template>
 					<template v-for="x in 7">
-						<span v-if="showOverlappingDays || df.isSameMonth(current, range.start)"
-							v-for="range in [getItemRange(df.addDays(firstDayOfMonth(current), (y-1) * 7 + (x-1)), PERIOD.DAY)]"
+						<span 
+							v-if="showOverlappingDays || df.isSameMonth(current, range.start)"
+							v-for="range in [getItemRange(df.addDays(firstVisibleDayOfMonthView(current), (y-1) * 7 + (x-1)), PERIOD.DAY)]"
 							v-data:item="[+range.start/10000, PERIOD.DAY]"
 							:class="[ { today: df.isSameDay(today, range.start), notThisMonth: !df.isSameMonth(current, range.start) }, itemClass(range, PERIOD.DAY) ]"
 						>
@@ -297,9 +298,12 @@ export default {
 	},
 	methods: {
 
-		firstDayOfMonth: function(date) {
-			
-			return df.setDay(df.startOfMonth(date), this.firstDayOfTheWeek);
+		firstVisibleDayOfMonthView: function(date) {
+
+			const startOfMonth = df.startOfMonth(date);
+			const day = df.getDay(startOfMonth);
+
+			return df.subDays(startOfMonth, (7 + day - this.firstDayOfTheWeek) % 7);
 		},
 
 		visibleWeeksCount: function(date) {
