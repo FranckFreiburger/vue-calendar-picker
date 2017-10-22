@@ -99,6 +99,7 @@ export default {
 				case PERIOD.WEEK: return { start: df.startOfWeek(date, this.dfOptions), end: df.startOfWeek(df.addWeeks(date, 1), this.dfOptions) };
 				case PERIOD.MONTH: return { start: df.startOfMonth(date), end: df.startOfMonth(df.addMonths(date, 1)) };
 				case PERIOD.YEAR: return { start: df.startOfYear(date), end: df.startOfYear(df.addYears(date, 1)) };
+				case PERIOD.DECADE: return { start: df.getYear(date)-9 , end:df.getYear(date)+6 };
 			}
 		},
 		
