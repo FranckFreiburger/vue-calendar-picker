@@ -18,10 +18,10 @@
 				:current="current"
 				:item-class="itemClass"
 			>
-				<template slot="header" scope="scope">
+				<template slot="header" slot-scope="scope">
 					<calendar-header v-if="viewCount > 1"></calendar-header>
 				</template>
-				<template scope="scope">
+				<template slot-scope="scope">
 					<slot :item-range="scope.itemRange" :layout="scope.layout"></slot>
 				</template>
 			</calendar-view>

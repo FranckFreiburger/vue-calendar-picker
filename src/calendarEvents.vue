@@ -11,7 +11,7 @@
 		:selection="selection"
 		@action="action"
 	>
-		<template scope="scope">
+		<template slot-scope="scope">
 			<div class="events">
 				<div
 					class="eventRange"
