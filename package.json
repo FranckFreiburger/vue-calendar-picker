@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/FranckFreiburger/vue-calendar-picker#readme",
   "dependencies": {
-    "date-fns": "^1.28.4"
+    "date-fns": "^1.29.0"
   }
 }
