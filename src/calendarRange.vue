@@ -18,7 +18,9 @@
 
 <script>
 
-import df from 'date-fns';
+import { differenceInMilliseconds as df_differenceInMilliseconds, addMilliseconds as df_addMilliseconds, isBefore as df_isBefore, subMilliseconds as df_subMilliseconds, min as df_min, max as df_max } from 'date-fns';
+
+
 import calendarEvents from './calendarEvents.vue';
 
 export default {
@@ -55,18 +57,18 @@ export default {
 				
 				if ( ev.keyActive ) {
 					
-					var rangeLength = df.differenceInMilliseconds(ev.range.end, ev.range.start);
-					var midRange = df.addMilliseconds(ev.range.start, rangeLength/2);
-					var midSel = df.addMilliseconds(this.selection.start, df.differenceInMilliseconds(this.selection.end, this.selection.start)/2);
+					var rangeLength = df_differenceInMilliseconds(ev.range.end, ev.range.start);
+					var midRange = df_addMilliseconds(ev.range.start, rangeLength/2);
+					var midSel = df_addMilliseconds(this.selection.start, df_differenceInMilliseconds(this.selection.end, this.selection.start)/2);
 
-					if ( df.isBefore(midRange, midSel) ) {
+					if ( df_isBefore(midRange, midSel) ) {
 
-						this.ref = { start: df.subMilliseconds(this.selection.end, rangeLength), end: this.selection.end }
-						this.selection.start = df.min(ev.range.start, this.ref.start);
+						this.ref = { start: df_subMilliseconds(this.selection.end, rangeLength), end: this.selection.end }
+						this.selection.start = df_min(ev.range.start, this.ref.start);
 					} else {
 
-						this.ref = { start: this.selection.start, end: df.addMilliseconds(this.selection.start, rangeLength) }
-						this.selection.end = df.max(ev.range.end, this.ref.end);
+						this.ref = { start: this.selection.start, end: df_addMilliseconds(this.selection.start, rangeLength) }
+						this.selection.end = df_max(ev.range.end, this.ref.end);
 					}
 					return;
 				}
@@ -81,8 +83,8 @@ export default {
 				
 				if ( this.ref ) {
 					
-					this.selection.start = df.min(ev.range.start, this.ref.start);
-					this.selection.end = df.max(ev.range.end, this.ref.end);
+					this.selection.start = df_min(ev.range.start, this.ref.start);
+					this.selection.end = df_max(ev.range.end, this.ref.end);
 					return;
 				}
 			}

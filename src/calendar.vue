@@ -247,7 +247,7 @@
 
 import calendarView from './calendarView.vue';
 import calendarHeader from './calendarHeader.vue';
-import df from 'date-fns';
+import { isValid as df_isValid, parse as df_parse, isEqual as df_isEqual, isAfter as df_isAfter, getTime as df_getTime } from 'date-fns';
 import findDataAttr from './findDataAttr.js';
 import isEq from './isEq.js';
 import PERIOD from './period.js';
@@ -276,7 +276,7 @@ export default {
 			},
 			validator: function(value) {
 				
-				return df.isValid(df.parse(value));
+				return df_isValid(df_parse(value));
 			}
 		},
 		viewCount: {
@@ -297,22 +297,22 @@ export default {
 		return {
 			animation: '',
 			view: this.initialView,
-			current: df.parse(this.initialCurrent),
+			current: df_parse(this.initialCurrent),
 		}
 	},
 
 	watch: {
 		initialCurrent: function(val, prev) {
 			
-			this.current = df.parse(val);
+			this.current = df_parse(val);
 		},
 		current: function(val, prev) {
 
 			var valRange = this.getItemRange(val, this.view);
 			var prevRange = this.getItemRange(prev, this.view);
 
-			if ( !df.isEqual(valRange.start, prevRange.start) )
-				this.animation = df.isAfter(val, prev) ? 'forwardSlide' : 'reverseSlide';
+			if ( !df_isEqual(valRange.start, prevRange.start) )
+				this.animation = df_isAfter(val, prev) ? 'forwardSlide' : 'reverseSlide';
 			else
 				this.animation = '';
 		},
@@ -335,7 +335,7 @@ export default {
 		
 		viewId: function(current) {
 			
-			return String(this.view) + String(df.getTime(current));
+			return String(this.view) + String(df_getTime(current));
 		},
 
 		pointerEvent: function(ev) {
@@ -386,7 +386,7 @@ export default {
 				
 				var value = JSON.parse(ev.dataAttr.item);
 				ev.type = value[1];
-				ev.range = this.getItemRange(df.parse(value[0]*10000), ev.type); // 10000: currently, min resolution is "minute"
+				ev.range = this.getItemRange(df_parse(value[0]*10000), ev.type); // 10000: currently, min resolution is "minute"
 			}
 			
 

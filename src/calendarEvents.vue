@@ -16,14 +16,14 @@
 				<div
 					class="eventRange"
 					v-for="(event, index) in sortedEvents"
-					v-if="!df.isEqual(event.start, event.end) && df.areRangesOverlapping(event.start, event.end, scope.itemRange.start, scope.itemRange.end)"
+					v-if="!df_isEqual(event.start, event.end) && df_areRangesOverlapping(event.start, event.end, scope.itemRange.start, scope.itemRange.end)"
 					:style="[ { backgroundColor: event.color }, eventStyle(event, scope.itemRange, scope.layout) ]"
 					:data-event="index"
 				></div>
 				<div
 					class="eventAt"
 					v-for="(event, index) in sortedEvents"
-					v-if="df.isEqual(event.start, event.end) && df.isWithinRange(event.start, scope.itemRange.start, scope.itemRange.end) && !df.isEqual(event.end, scope.itemRange.end)"
+					v-if="df_isEqual(event.start, event.end) && df_isWithinRange(event.start, scope.itemRange.start, scope.itemRange.end) && !df_isEqual(event.end, scope.itemRange.end)"
 					:style="{ backgroundColor: event.color }"
 					:data-event="index"
 				></div>
@@ -130,7 +130,8 @@
 
 <script>
 
-import df from 'date-fns'; // https://date-fns.org
+ // https://date-fns.org
+import { from as df_from, isEqual as df_isEqual, isAfter as df_isAfter, isBefore as df_isBefore, min as df_min, max as df_max, areRangesOverlapping as df_areRangesOverlapping, isWithinRange as df_isWithinRange } from 'date-fns';
 import calendar from './calendar.vue';
 
 export default {
@@ -178,29 +179,29 @@ export default {
 
 			var start = this.selection.start;
 			var end = this.selection.end;
-			var start = df.min(start, end);
-			var end = df.max(start, end);
+			var start = df_min(start, end);
+			var end = df_max(start, end);
 			
 			
-			if ( !(df.isAfter(start, range.start) || df.isBefore(end, range.end)) ) {
+			if ( !(df_isAfter(start, range.start) || df_isBefore(end, range.end)) ) {
 				
 				classlist.push('selection2');
 				
-				if ( df.isEqual(start, range.start) )
+				if ( df_isEqual(start, range.start) )
 					classlist.push('selectionStart');
 				
-				if ( df.isEqual(end, range.end) )
+				if ( df_isEqual(end, range.end) )
 					classlist.push('selectionEnd');	
 				
 			} else
-			if ( df.areRangesOverlapping(start, end, range.start, range.end) ) {
+			if ( df_areRangesOverlapping(start, end, range.start, range.end) ) {
 				
 				classlist.push('selection1');
 				
-				if ( df.isWithinRange(start, range.start, range.end) )
+				if ( df_isWithinRange(start, range.start, range.end) )
 					classlist.push('selectionStart');
 
-				if ( df.isWithinRange(end, range.start, range.end) )
+				if ( df_isWithinRange(end, range.start, range.end) )
 					classlist.push('selectionEnd');
 			}
 			
@@ -216,8 +217,8 @@ export default {
 
 			var itemLength = itemRange.end - itemRange.start;
 			
-			var start = df.max(event.start, itemRange.start);
-			var end = df.min(event.end, itemRange.end);
+			var start = df_max(event.start, itemRange.start);
+			var end = df_min(event.end, itemRange.end);
 			
 			var offset = (start - itemRange.start) / itemLength;
 			var size = (end - itemRange.start) / itemLength - offset;
@@ -240,7 +241,7 @@ export default {
 	},
 	created: function() {
 
-		this.df = df;
+		Object.assign(this, { df_isEqual, df_areRangesOverlapping, df_isWithinRange });
 	}
 }
 </script>

@@ -7,11 +7,11 @@
 				<div v-for="y in 15">
 					<template v-for="x in 4">
 						<span
-							v-for="range in [getItemRange(df.setMinutes(current, (y-1) + (x-1)*15 ), PERIOD.MINUTE)]"
+							v-for="range in [getItemRange(df_setMinutes(current, (y-1) + (x-1)*15 ), PERIOD.MINUTE)]"
 							v-data:item="[+range.start/10000, PERIOD.MINUTE]"
-							:class="[ { today: df.isSameMinute(today, range.start) }, itemClass(range, PERIOD.MINUTE) ]"
+							:class="[ { today: df_isSameMinute(today, range.start) }, itemClass(range, PERIOD.MINUTE) ]"
 						>
-							<div class="cellHead">{{df.format(range.start, 'mm')}}</div>
+							<div class="cellHead">{{df_format(range.start, 'mm')}}</div>
 							<slot :item-range="range" :layout="viewLayout[view]"></slot>
 						</span>
 					</template>
@@ -22,11 +22,11 @@
 				<div v-for="y in 12">
 					<template v-for="x in 2">
 						<span
-							v-for="range in [getItemRange(df.setHours(current, (y-1) + (x-1)*12 ), PERIOD.HOUR)]"
+							v-for="range in [getItemRange(df_setHours(current, (y-1) + (x-1)*12 ), PERIOD.HOUR)]"
 							v-data:item="[+range.start/10000, PERIOD.HOUR]"
-							:class="[ { today: df.isSameHour(today, range.start) }, itemClass(range, PERIOD.HOUR) ]"
+							:class="[ { today: df_isSameHour(today, range.start) }, itemClass(range, PERIOD.HOUR) ]"
 						>
-							<div class="cellHead">{{df.format(range.start, 'HH')}}<sup>h</sup></div>
+							<div class="cellHead">{{df_format(range.start, 'HH')}}<sup>h</sup></div>
 							<slot :item-range="range" :layout="viewLayout[view]"></slot>
 						</span>
 					</template>
@@ -38,19 +38,19 @@
 					<span></span>
 					<template v-for="x in 7">
 						<span
-							v-for="arg in [df.addDays(df.startOfWeek(current, dfOptions), x-1)]"
+							v-for="arg in [df_addDays(df_startOfWeek(current, dfOptions), x-1)]"
 							v-data:item="[+arg/10000, PERIOD.DAY]"
-							:class="[ { today: df.isSameDay(today, arg) } ]"
-						>{{format(arg, 'dd')}}<sub>{{df.getDate(arg)}}</sub></span>
+							:class="[ { today: df_isSameDay(today, arg) } ]"
+						>{{format(arg, 'dd')}}<sub>{{df_getDate(arg)}}</sub></span>
 					</template>
 				</div>
 				<div v-for="y in 24">
 					<span v-text="y-1"></span>
 					<template v-for="x in 7">
 						<span
-							v-for="range in [getItemRange(df.addHours(df.addDays(df.startOfWeek(current, dfOptions), x-1), y-1), PERIOD.HOUR)]"
+							v-for="range in [getItemRange(df_addHours(df_addDays(df_startOfWeek(current, dfOptions), x-1), y-1), PERIOD.HOUR)]"
 							v-data:item="[+range.start/10000, PERIOD.HOUR]"
-							:class="[ { thisMonth: df.isSameMonth(current, range.start) }, itemClass(range, PERIOD.HOUR) ]"
+							:class="[ { thisMonth: df_isSameMonth(current, range.start) }, itemClass(range, PERIOD.HOUR) ]"
 						>
 							<slot :item-range="range" :layout="viewLayout[view]"></slot>
 						</span>
@@ -61,24 +61,24 @@
 			<template v-if="view === PERIOD.MONTH">
 				<div>
 					<span v-if="!compact"></span>
-					<span v-for="n in 7" v-text="format(df.setDay(current, firstDayOfTheWeek+n-1), compact ? 'dd' : 'ddd')"></span>
+					<span v-for="n in 7" v-text="format(df_setDay(current, firstDayOfTheWeek+n-1), compact ? 'dd' : 'ddd')"></span>
 				</div>
 				<div v-for="y in compact ? visibleWeeksCount(current) : 6">
-					<template v-for="week in [df.addDays(firstVisibleDayOfMonthView(current), (y-1) * 7)]">
+					<template v-for="week in [df_addDays(firstVisibleDayOfMonthView(current), (y-1) * 7)]">
 						<span
 							v-if="!compact && (y <= visibleWeeksCount(current) || showOverlappingDays)"
 							v-data:item="[+week/10000, PERIOD.WEEK]"
-							v-text="df.getISOWeek(week)"
+							v-text="df_getISOWeek(week)"
 						></span>
 					</template>
 					<template v-for="x in 7">
 						<span 
-							v-if="showOverlappingDays || df.isSameMonth(current, range.start)"
-							v-for="range in [getItemRange(df.addDays(firstVisibleDayOfMonthView(current), (y-1) * 7 + (x-1)), PERIOD.DAY)]"
+							v-if="showOverlappingDays || df_isSameMonth(current, range.start)"
+							v-for="range in [getItemRange(df_addDays(firstVisibleDayOfMonthView(current), (y-1) * 7 + (x-1)), PERIOD.DAY)]"
 							v-data:item="[+range.start/10000, PERIOD.DAY]"
-							:class="[ { today: df.isSameDay(today, range.start), notThisMonth: !df.isSameMonth(current, range.start) }, itemClass(range, PERIOD.DAY) ]"
+							:class="[ { today: df_isSameDay(today, range.start), notThisMonth: !df_isSameMonth(current, range.start) }, itemClass(range, PERIOD.DAY) ]"
 						>
-							<div class="cellHead" v-text="df.getDate(range.start)"></div>
+							<div class="cellHead" v-text="df_getDate(range.start)"></div>
 							<slot :item-range="range" :layout="viewLayout[view]"></slot>
 						</span>
 						<span v-else></span>
@@ -90,9 +90,9 @@
 				<div v-for="y in 3">
 					<template v-for="x in 4">
 						<span
-							v-for="range in [getItemRange(df.setMonth(current, (y-1)*4 + (x-1)), PERIOD.MONTH)]"
+							v-for="range in [getItemRange(df_setMonth(current, (y-1)*4 + (x-1)), PERIOD.MONTH)]"
 							v-data:item="[+range.start/10000, PERIOD.MONTH]"
-							:class="[ { today: df.isSameMonth(today, range.start) }, itemClass(range, PERIOD.MONTH) ]"
+							:class="[ { today: df_isSameMonth(today, range.start) }, itemClass(range, PERIOD.MONTH) ]"
 						>
 							<div class="cellHead" v-text="format(range.start, compact ? 'MMM' : 'MMMM')"></div>
 							<slot :item-range="range" :layout="viewLayout[view]"></slot>
@@ -105,11 +105,11 @@
 				<div v-for="y in 4">
 					<template v-for="x in 4">
 						<span
-							v-for="range in [getItemRange(df.addYears(current, (y-1)*4 + (x-1) - 9), PERIOD.YEAR)]"
+							v-for="range in [getItemRange(df_addYears(current, (y-1)*4 + (x-1) - 9), PERIOD.YEAR)]"
 							v-data:item="[+range.start/10000, PERIOD.YEAR]"
-							:class="[ { today: df.isSameYear(today, range.start) }, itemClass(range, PERIOD.YEAR) ]"
+							:class="[ { today: df_isSameYear(today, range.start) }, itemClass(range, PERIOD.YEAR) ]"
 						>
-							<div class="cellHead" v-text="df.getYear(range.start)"></div>
+							<div class="cellHead" v-text="df_getYear(range.start)"></div>
 						</span>
 					</template>
 				</div>
@@ -258,7 +258,8 @@
 
 <script>
 
-import df from 'date-fns';
+import { setMinutes as df_setMinutes, isSameMinute as df_isSameMinute, format as df_format, setHours as df_setHours, isSameHour as df_isSameHour, addDays as df_addDays, startOfWeek as df_startOfWeek, isSameDay as df_isSameDay, getDate as df_getDate, addHours as df_addHours, isSameMonth as df_isSameMonth, setDay as df_setDay, getISOWeek as df_getISOWeek, setMonth as df_setMonth, addYears as df_addYears, isSameYear as df_isSameYear, getYear as df_getYear, startOfMonth as df_startOfMonth, getDay as df_getDay, subDays as df_subDays, getDaysInMonth as df_getDaysInMonth } from 'date-fns';
+
 import PERIOD from './period.js';
 import mixin from './mixin.js';
 import findDataAttr from './findDataAttr.js';
@@ -300,19 +301,23 @@ export default {
 
 		firstVisibleDayOfMonthView: function(date) {
 
-			const startOfMonth = df.startOfMonth(date);
-			const day = df.getDay(startOfMonth);
+			const startOfMonth = df_startOfMonth(date);
+			const day = df_getDay(startOfMonth);
 
-			return df.subDays(startOfMonth, (7 + day - this.firstDayOfTheWeek) % 7);
+			return df_subDays(startOfMonth, (7 + day - this.firstDayOfTheWeek) % 7);
 		},
 
 		visibleWeeksCount: function(date) {
 
-			const startOfMonth = df.startOfMonth(date);
-			const day = df.getDay(startOfMonth);
+			const startOfMonth = df_startOfMonth(date);
+			const day = df_getDay(startOfMonth);
 
-			return Math.ceil((df.getDaysInMonth(date) + (7 + day - this.firstDayOfTheWeek) % 7) / 7);
+			return Math.ceil((df_getDaysInMonth(date) + (7 + day - this.firstDayOfTheWeek) % 7) / 7);
 		}
+	},
+	created: function() {
+
+		Object.assign(this, { df_setMinutes, df_isSameMinute, df_format, df_setHours, df_isSameHour, df_addDays, df_startOfWeek, df_isSameDay, df_getDate, df_addHours, df_isSameMonth, df_setDay, df_getISOWeek, df_setMonth, df_addYears, df_isSameYear, df_getYear, df_startOfMonth, df_getDay, df_subDays, df_getDaysInMonth });
 	}
 }
 </script>

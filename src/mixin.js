@@ -1,5 +1,6 @@
 import isEq from './isEq.js';
-import df from 'date-fns';
+
+import { format as df_format, addMinutes as df_addMinutes, addHours as df_addHours, addDays as df_addDays, addWeeks as df_addWeeks, addMonths as df_addMonths, addYears as df_addYears, startOfMinute as df_startOfMinute, startOfHour as df_startOfHour, startOfDay as df_startOfDay, startOfWeek as df_startOfWeek, startOfMonth as df_startOfMonth, startOfYear as df_startOfYear, getYear as df_getYear } from 'date-fns';
 import PERIOD from './period.js';
 import pointerEventDirective from './pointerEventDirective.js';
 
@@ -74,32 +75,32 @@ export default {
 	methods: {
 		format: function(date, format) {
 
-			return df.format(date, format, { locale: this.dateFnsLocale });
+			return df_format(date, format, { locale: this.dateFnsLocale });
 		},
 		
 		dateAdd: function(date, type, count) {
 			
 			switch ( type ) {
-				case PERIOD.MINUTE: return df.addMinutes(date, count);
-				case PERIOD.HOUR: return df.addHours(date, count);
-				case PERIOD.DAY: return df.addDays(date, count);
-				case PERIOD.WEEK: return df.addWeeks(date, count);
-				case PERIOD.MONTH: return df.addMonths(date, count);
-				case PERIOD.YEAR: return df.addYears(date, count);
-				case PERIOD.DECADE: return df.addYears(date, 16 * count);
+				case PERIOD.MINUTE: return df_addMinutes(date, count);
+				case PERIOD.HOUR: return df_addHours(date, count);
+				case PERIOD.DAY: return df_addDays(date, count);
+				case PERIOD.WEEK: return df_addWeeks(date, count);
+				case PERIOD.MONTH: return df_addMonths(date, count);
+				case PERIOD.YEAR: return df_addYears(date, count);
+				case PERIOD.DECADE: return df_addYears(date, 16 * count);
 			}
 		},
 		
 		getItemRange: function(date, type) {
 			
 			switch ( type ) {
-				case PERIOD.MINUTE: return { start: df.startOfMinute(date), end: df.startOfMinute(df.addMinutes(date, 1)) };
-				case PERIOD.HOUR: return { start: df.startOfHour(date), end: df.startOfHour(df.addHours(date, 1)) };
-				case PERIOD.DAY: return { start: df.startOfDay(date), end: df.startOfDay(df.addDays(date, 1)) };
-				case PERIOD.WEEK: return { start: df.startOfWeek(date, this.dfOptions), end: df.startOfWeek(df.addWeeks(date, 1), this.dfOptions) };
-				case PERIOD.MONTH: return { start: df.startOfMonth(date), end: df.startOfMonth(df.addMonths(date, 1)) };
-				case PERIOD.YEAR: return { start: df.startOfYear(date), end: df.startOfYear(df.addYears(date, 1)) };
-				case PERIOD.DECADE: return { start: df.getYear(date)-9 , end:df.getYear(date)+6 };
+				case PERIOD.MINUTE: return { start: df_startOfMinute(date), end: df_startOfMinute(df_addMinutes(date, 1)) };
+				case PERIOD.HOUR: return { start: df_startOfHour(date), end: df_startOfHour(df_addHours(date, 1)) };
+				case PERIOD.DAY: return { start: df_startOfDay(date), end: df_startOfDay(df_addDays(date, 1)) };
+				case PERIOD.WEEK: return { start: df_startOfWeek(date, this.dfOptions), end: df_startOfWeek(df_addWeeks(date, 1), this.dfOptions) };
+				case PERIOD.MONTH: return { start: df_startOfMonth(date), end: df_startOfMonth(df_addMonths(date, 1)) };
+				case PERIOD.YEAR: return { start: df_startOfYear(date), end: df_startOfYear(df_addYears(date, 1)) };
+				case PERIOD.DECADE: return { start: df_getYear(date)-9 , end:df_getYear(date)+6 };
 			}
 		},
 		
@@ -107,7 +108,6 @@ export default {
 	
 	created: function() {
 		
-		this.df = df;
 		this.PERIOD = PERIOD;
 	}
 	
